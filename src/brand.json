@@ -1,0 +1,14 @@
+{
+  "_": "アプリの名前と、名前に合わせた言葉。公開リポジトリには仮の名前（brand.json）だけを置き、本当の名前は brand.private.json（Gitに入れない）に書く。BRAND=private を付けてビルドすると本当の名前になる。",
+  "name": "タイトル",
+  "longName": "タイトル",
+  "logoHead": "タイ",
+  "logoTail": "トル",
+  "greeting": "今日の1問、いかがですか",
+  "doneGreeting": "今日もおつかれさまでした",
+  "start": "スタート",
+  "playing": "",
+  "done": "クリア！",
+  "about": "",
+  "description": "1日1回の脳トレでスタンプをためて、クーポンと交換できます。"
+}
