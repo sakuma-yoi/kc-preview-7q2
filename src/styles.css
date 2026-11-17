@@ -2940,3 +2940,12 @@ a.btn {
   white-space: nowrap;
   letter-spacing: -0.04em;
 }
+
+/* お弁当は絵だけなので、おかずを大きく */
+.bento-cell span {
+  font-size: 54px;
+}
+.bento-sides.n4 .bento-cell span,
+.bento-sides.n5 .bento-cell span {
+  font-size: 44px;
+}

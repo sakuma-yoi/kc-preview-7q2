@@ -19,11 +19,11 @@ function BentoBox({ items, closed }: { items: Product[]; closed: boolean }) {
         </div>
         <div className={`bento-sides n${items.length}`}>
           {items.map((p) => (
-            <div key={p.id} className="bento-cell">
+            // 名前は出さず、絵だけで覚える（読み上げ用の名前だけ持たせる）
+            <div key={p.id} className="bento-cell" role="img" aria-label={shortName(p)}>
               <span>
                 <PIcon id={p.id} />
               </span>
-              <small>{shortName(p)}</small>
             </div>
           ))}
         </div>
