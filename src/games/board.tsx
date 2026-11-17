@@ -5,6 +5,7 @@ import { PIcon } from '../components/PIcon'
 import { shortName, type Product } from '../data/products'
 import { sfx } from '../lib/sfx'
 import { randInt, sample, shuffle } from '../lib/util'
+import { DIFF, DIFF_MISSES, MEMO, MEMO_LOOK_BASE_MS, MEMO_LOOK_PER_ITEM_MS, PACE, PAIRS, PAIRS_FLIP_BACK_MS } from '../data/levels'
 import { Stage, useRounds, type GameProps } from './common'
 
 /* ---------- 間違い探し ---------- */
@@ -13,18 +14,18 @@ type Cell = { p: Product; flip?: boolean }
 
 function DiffRound({ products, level, onEnd }: { products: Product[]; level: number; onEnd: (found: number, ids: string[]) => void }) {
   const q = useMemo(() => {
-    const cols = [3, 4, 4][level]
-    const n = [9, 12, 16][level]
+    const lv = DIFF[level]
+    const cols = lv.cols
     const pool = sample(products, Math.min(6, products.length))
-    const base: Cell[] = Array.from({ length: n }, () => ({ p: pool[randInt(pool.length)] }))
+    const base: Cell[] = Array.from({ length: lv.cells }, () => ({ p: pool[randInt(pool.length)] }))
     const diffs = sample(
       base.map((_, i) => i),
-      3,
+      lv.diffs,
     )
     const changed = base.map((c) => ({ ...c }))
     diffs.forEach((i, k) => {
-      // 最後の問題では、1つだけ「さかさま」の違いを入れる
-      if (level === 2 && k === 0) changed[i].flip = true
+      // 難しいレベルでは、1つだけ「さかさま」の違いを入れる
+      if (lv.flip && k === 0) changed[i].flip = true
       else changed[i].p = sample(pool.filter((x) => x !== base[i].p), 1)[0]
     })
     return { cols, base, changed, diffs }
@@ -42,14 +43,14 @@ function DiffRound({ products, level, onEnd }: { products: Product[]; level: num
     if (q.diffs.includes(i)) {
       const next = [...found, i]
       setFound(next)
-      if (next.length === 3) {
+      if (next.length === q.diffs.length) {
         setOver(true)
-        onEnd(3, idsOf(next))
+        onEnd(next.length, idsOf(next))
       } else sfx('ok')
     } else {
       const m = miss + 1
       setMiss(m)
-      if (m >= 3) {
+      if (m >= DIFF_MISSES) {
         setOver(true)
         onEnd(found.length, idsOf(found))
       } else sfx('ng')
@@ -78,10 +79,10 @@ function DiffRound({ products, level, onEnd }: { products: Product[]; level: num
     <>
       <p className="hud">
         <span>
-          見つけた <b>{found.length}</b> / 3
+          見つけた <b>{found.length}</b> / {q.diffs.length}
         </span>
         <span>
-          おてつき <b>{miss}</b> / 3
+          おてつき <b>{miss}</b> / {DIFF_MISSES}
         </span>
       </p>
       <p className="grid-label">おてほん</p>
@@ -93,14 +94,17 @@ function DiffRound({ products, level, onEnd }: { products: Product[]; level: num
 }
 
 export function Diff({ products, onDone }: GameProps) {
-  const r = useRounds(3, onDone, { fast: 8, slow: 35 })
+  const r = useRounds(3, onDone, PACE.diff, DIFF.length)
+  const diffs = DIFF[r.level].diffs
   return (
-    <Stage r={r} question="下の絵から、違うところを3つ見つけてください">
+    <Stage r={r} question={`下の絵から、違うところを${diffs}つ見つけてください`}>
       <DiffRound
         key={r.round}
         products={products}
-        level={r.round}
-        onEnd={(found, ids) => r.answer((found * 100) / 9, found === 3, 1300, ids)}
+        level={r.level}
+        onEnd={(found, ids) =>
+          r.answer((100 / 3) * (found / diffs), found === diffs, 1300, ids, found === diffs ? 'up' : found >= diffs - 1 ? 'keep' : 'miss')
+        }
       />
     </Stage>
   )
@@ -108,7 +112,7 @@ export function Diff({ products, onDone }: GameProps) {
 
 /* ---------- 商品神経衰弱 ---------- */
 
-function PairsRound({ items, onEnd }: { items: Product[]; onEnd: (tries: number) => void }) {
+function PairsRound({ items, cols, onEnd }: { items: Product[]; cols: number; onEnd: (tries: number) => void }) {
   const cards = useMemo(() => shuffle([...items, ...items]), []) // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState<number[]>([])
   const [matched, setMatched] = useState<number[]>([])
@@ -134,7 +138,7 @@ function PairsRound({ items, onEnd }: { items: Product[]; onEnd: (tries: number)
       window.setTimeout(() => {
         setOpen([])
         setLock(false)
-      }, 850)
+      }, PAIRS_FLIP_BACK_MS)
     }
   }
 
@@ -148,7 +152,7 @@ function PairsRound({ items, onEnd }: { items: Product[]; onEnd: (tries: number)
           めくった回数 <b>{tries}</b>
         </span>
       </p>
-      <div className="grid c4 pairs">
+      <div className={`grid c${cols} pairs`}>
         {cards.map((p, i) => {
           const up = open.includes(i) || matched.includes(i)
           return (
@@ -168,18 +172,20 @@ function PairsRound({ items, onEnd }: { items: Product[]; onEnd: (tries: number)
 }
 
 export function Pairs({ products, onDone }: GameProps) {
-  const r = useRounds(2, onDone, { fast: 15, slow: 50 })
-  const sets = useMemo(() => [sample(products, 4), sample(products, 6)], []) // eslint-disable-line react-hooks/exhaustive-deps
-  const items = sets[r.round]
+  const r = useRounds(3, onDone, PACE.pairs, PAIRS.length)
+  const lv = PAIRS[r.level]
+  const items = useMemo(() => sample(products, lv.pairs), [r.round]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => r.see(items.map((p) => p.id)), [r.round]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <Stage r={r} question="同じ商品のペアをそろえてください">
       <PairsRound
         key={r.round}
         items={items}
+        cols={lv.cols}
         onEnd={(tries) => {
+          // 余分にめくった回数が少なければ、次はペアを増やす
           const extra = Math.max(0, tries - items.length)
-          r.answer(50 * Math.max(0.3, 1 - extra / (items.length * 2)), true, 1100)
+          r.answer((100 / 3) * Math.max(0.3, 1 - extra / (items.length * 2)), true, 1100, undefined, extra <= items.length ? 'up' : 'keep')
         }}
       />
     </Stage>
@@ -188,14 +194,14 @@ export function Pairs({ products, onDone }: GameProps) {
 
 /* ---------- 買い物リスト暗記 ---------- */
 
-function MemoRound({ products, n, onEnd, onReady }: { products: Product[]; n: number; onEnd: (correct: string[]) => void; onReady: () => void }) {
+function MemoRound({ products, n, shelf, onEnd, onReady }: { products: Product[]; n: number; shelf: number; onEnd: (correct: string[]) => void; onReady: () => void }) {
   const q = useMemo(() => {
     const pool = shuffle(products)
     const list = pool.slice(0, n)
-    return { list, shelf: shuffle([...list, ...pool.slice(n, 9)]) }
+    return { list, shelf: shuffle([...list, ...pool.slice(n, shelf)]) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  const lookMs = 2500 + n * 700
+  const lookMs = MEMO_LOOK_BASE_MS + n * MEMO_LOOK_PER_ITEM_MS
   const [look, setLook] = useState(true)
   const [picked, setPicked] = useState<string[]>([])
   const [over, setOver] = useState(false)
@@ -268,16 +274,17 @@ function MemoRound({ products, n, onEnd, onReady }: { products: Product[]; n: nu
 }
 
 export function Memo({ products, onDone }: GameProps) {
-  const r = useRounds(4, onDone, { fast: 3, slow: 12 })
-  const n = [3, 3, 4, 5][r.round]
+  const r = useRounds(4, onDone, PACE.memo, MEMO.length)
+  const { items: n, shelf } = MEMO[r.level]
   return (
     <Stage r={r} question="メモにあった商品を、全部えらんでください">
       <MemoRound
         key={r.round}
         products={products}
         n={n}
+        shelf={shelf}
         onReady={r.startClock}
-        onEnd={(ids) => r.answer((25 * ids.length) / n, ids.length === n, 1500, ids)}
+        onEnd={(ids) => r.answer((25 * ids.length) / n, ids.length === n, 1500, ids, ids.length === n ? 'up' : ids.length >= n - 1 && n >= 3 ? 'keep' : 'miss')}
       />
     </Stage>
   )
@@ -351,7 +358,7 @@ function AnagramRound({ product, onEnd }: { product: Product; onEnd: (points: nu
 }
 
 export function Anagram({ products, onDone }: GameProps) {
-  const r = useRounds(5, onDone, { fast: 4, slow: 16 })
+  const r = useRounds(5, onDone, PACE.anagram)
   const picks = useMemo(() => {
     const s = sample(products, 5)
     while (s.length < 5) s.push(products[randInt(products.length)])

@@ -21,13 +21,13 @@ export type Game = {
 }
 
 export const GAMES: Game[] = [
-  { id: 'freezer', name: '冷凍庫の中身記憶', category: '記憶', summary: '3秒見た冷凍庫の中身を答える', rule: '冷凍庫の中を3秒だけ見せます。とびらが閉まったら、入っていた商品・入っていなかった商品を答えてください。', questions: 5, minutes: 1, icon: '🧊', free: true, minProducts: 8 },
-  { id: 'register', name: 'お会計チャレンジ', category: '計算', summary: 'レシートの合計金額を暗算', rule: 'レシートの商品を全部たして、合計金額を4つの中から選んでください。', questions: 5, minutes: 2, icon: '🧾', free: true, minProducts: 4 },
-  { id: 'diff', name: '間違い探し', category: '観察', summary: '2枚の絵の違いを3つ探す', rule: '上の「おてほん」と下の絵をくらべて、違うところを下の絵から3つ見つけてください。おてつきは3回までです。', questions: 3, minutes: 2, icon: '🔍', minProducts: 6 },
-  { id: 'pairs', name: '商品神経衰弱', category: '記憶', summary: '商品のペアをそろえる', rule: 'カードを2枚ずつめくって、同じ商品のペアをそろえてください。少ない回数でそろえるほど高得点です。', questions: 2, minutes: 2, icon: '🃏', minProducts: 6 },
-  { id: 'memo', name: '買い物リスト暗記', category: '記憶', summary: 'メモを覚えて売り場で選ぶ', rule: '買い物メモを数秒で覚えます。メモが消えたら、売り場からメモにあった商品を全部選んでください。', questions: 4, minutes: 2, icon: '📝', minProducts: 9 },
-  { id: 'range', name: 'レンジ時間の計算', category: '計算', summary: '温め時間の合計を答える', rule: '商品を順番に温めます。レンジの時間を全部たすと何分何秒になるか、4つの中から選んでください。', questions: 5, minutes: 1, icon: '⏲️', minProducts: 4 },
-  { id: 'oddone', name: '仲間はずれ探し', category: '観察', summary: '1つだけ違う商品を探す', rule: 'たくさん並んだ商品の中から、1つだけ違うものを見つけてください。後半は、少しだけ違うものを探します。2回まで押せます。', questions: 5, minutes: 1, icon: '👀', minProducts: 4 },
+  { id: 'freezer', name: '冷凍庫の中身記憶', category: '記憶', summary: '3秒見た冷凍庫の中身を答える', rule: '冷凍庫の中を数秒だけ見せます。とびらが閉まったら、入っていた商品を答えてください。正解が続くと、商品が増えたり「入っていなかった商品」を聞かれたりします。', questions: 5, minutes: 1, icon: '🧊', free: true, minProducts: 8 },
+  { id: 'register', name: 'お会計チャレンジ', category: '計算', summary: 'レシートの合計金額を暗算', rule: 'レシートの商品を全部たして、合計金額を4つの中から選んでください。正解が続くと、商品が増えて、選択肢の金額も近くなります。', questions: 5, minutes: 2, icon: '🧾', free: true, minProducts: 4 },
+  { id: 'diff', name: '間違い探し', category: '観察', summary: '2枚の絵の違いを3つ探す', rule: '上の「おてほん」と下の絵をくらべて、違うところを下の絵から全部見つけてください。おてつきは4回までです。全部見つけると、次の絵は少し大きくなります。', questions: 3, minutes: 2, icon: '🔍', minProducts: 6 },
+  { id: 'pairs', name: '商品神経衰弱', category: '記憶', summary: '商品のペアをそろえる', rule: 'カードを2枚ずつめくって、同じ商品のペアをそろえてください。少ない回数でそろえるほど高得点で、次はカードが増えます。', questions: 3, minutes: 2, icon: '🃏', minProducts: 6 },
+  { id: 'memo', name: '買い物リスト暗記', category: '記憶', summary: 'メモを覚えて売り場で選ぶ', rule: '買い物メモを数秒で覚えます。メモが消えたら、売り場からメモにあった商品を全部選んでください。正解が続くと、メモの品数が増えます。', questions: 4, minutes: 2, icon: '📝', minProducts: 9 },
+  { id: 'range', name: 'レンジ時間の計算', category: '計算', summary: '温め時間の合計を答える', rule: '商品を順番に温めます。レンジの時間を全部たすと何分何秒になるか、4つの中から選んでください。正解が続くと、商品が増えて、選択肢も近くなります。', questions: 5, minutes: 1, icon: '⏲️', minProducts: 4 },
+  { id: 'oddone', name: '仲間はずれ探し', category: '観察', summary: '1つだけ違う商品を探す', rule: '並んだ商品の中から、1つだけ違うものを見つけてください。2回まで押せます。正解が続くと数が増え、少しだけ違うものを探す問題になります。', questions: 5, minutes: 1, icon: '👀', minProducts: 4 },
   { id: 'anagram', name: '商品名の並べ替え', category: '言葉', summary: 'バラバラの文字を商品名に並べ替える', rule: 'バラバラになった文字を順番にタップして、商品の名前を作ってください。1問につき2回まで挑戦できます。', questions: 5, minutes: 2, icon: '🔤', minProducts: 5 },
 ]
 

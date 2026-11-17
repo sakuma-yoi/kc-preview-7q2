@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { SCORE_ACCURACY, SCORE_SPEED } from '../data/config'
+import { MISSES_TO_DOWN } from '../data/levels'
 import type { Product } from '../data/products'
 import { sfx } from '../lib/sfx'
 import { shuffle } from '../lib/util'
@@ -16,9 +17,18 @@ export type GameProps = {
 /** 速さの基準（秒）。fast 以内なら速さ満点、slow を超えると速さ0点 */
 export type Pace = { fast: number; slow: number }
 
-/** 問題の進行・得点（正確さ＋速さ）・覚えた商品をまとめて管理する */
-export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace) {
+/** 次のレベルの決め方。up＝1つ上げる、keep＝そのまま、miss＝まちがい（続くと下がる） */
+export type Step = 'up' | 'keep' | 'miss'
+
+/**
+ * 問題の進行・得点（正確さ＋速さ）・覚えた商品・難しさのレベルをまとめて管理する
+ * levels はレベルの数（src/data/levels.ts の表の行数）。1問目はレベル0から
+ */
+export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace, levels = 1) {
   const [round, setRound] = useState(0)
+  const [level, setLevel] = useState(0)
+  const levelRef = useRef(0)
+  const misses = useRef(0)
   const [mark, setMark] = useState<null | 'ok' | 'ng'>(null)
   const roundRef = useRef(0)
   const accuracy = useRef(0)
@@ -46,8 +56,11 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
     clock.current = performance.now()
   }
 
-  /** 1問の結果を受け取り、◯✕を出してから次へ進む。ids を渡すと、その商品だけを記録する */
-  const answer = (points: number, ok: boolean, delay = 900, ids?: string[]) => {
+  /**
+   * 1問の結果を受け取り、◯✕を出してから次へ進む。ids を渡すと、その商品だけを記録する
+   * step を省くと、正解ならレベルを上げ、不正解なら「まちがい」として数える
+   */
+  const answer = (points: number, ok: boolean, delay = 900, ids?: string[], step?: Step) => {
     if (busy.current) return
     busy.current = true
     const t = (performance.now() - clock.current) / 1000
@@ -66,15 +79,27 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
         const acc = Math.min(score, Math.round(accuracy.current))
         onDone(score, learned.current, { accuracy: acc, speed: score - acc })
       } else {
+        const s = step ?? (ok ? 'up' : 'miss')
+        if (s === 'up') {
+          levelRef.current = Math.min(levels - 1, levelRef.current + 1)
+          misses.current = 0
+        } else if (s === 'miss') {
+          misses.current += 1
+          if (misses.current >= MISSES_TO_DOWN) {
+            levelRef.current = Math.max(0, levelRef.current - 1)
+            misses.current = 0
+          }
+        }
         pending.current = []
         clock.current = performance.now()
         roundRef.current += 1
+        setLevel(levelRef.current)
         setRound(roundRef.current)
       }
     }, delay)
   }
 
-  return { round, total, mark, see, startClock, answer }
+  return { round, level, total, mark, see, startClock, answer }
 }
 
 type StageProps = { r: ReturnType<typeof useRounds>; question: ReactNode; children: ReactNode }
@@ -103,10 +128,10 @@ export function Stage({ r, question, children }: StageProps) {
   )
 }
 
-/** 正解と、それに近い数字の4択を作る */
-export function numberChoices(correct: number, deltas: number[], min: number) {
+/** 正解と、差が gaps のどれかになる数字で4択を作る（上下どちらにもずらす） */
+export function numberChoices(correct: number, gaps: number[], min: number) {
   const set = new Set([correct])
-  for (const d of shuffle(deltas)) {
+  for (const d of shuffle(gaps.flatMap((g) => [g, -g]))) {
     if (set.size === 4) break
     if (correct + d >= min) set.add(correct + d)
   }

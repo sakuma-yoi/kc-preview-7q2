@@ -2189,3 +2189,12 @@ a.btn {
   font-size: 18px;
   box-shadow: 0 2px 0 rgba(23, 54, 74, 0.18);
 }
+
+.grid.c5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+.grid.c3.pairs {
+  max-width: 300px;
+  width: 100%;
+  align-self: center;
+}
