@@ -42,7 +42,8 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
   const [phase, setPhase] = useState<'intro' | 'practice' | 'practiceDone' | 'play' | 'result'>('intro')
   // 練習（チュートリアル）：その脳トレを初めて遊ぶときと、今日の脳トレのときは毎回
   const needPractice = daily || !(state.tutorials ?? []).includes(gameId)
-  const [practiceOk, setPracticeOk] = useState(false)
+  // 練習の結果：ok＝正解、ng＝まちがい、skip＝とばした
+  const [practiceOk, setPracticeOk] = useState<'ok' | 'ng' | 'skip'>('ng')
   const [practiceRun, setPracticeRun] = useState(0)
   const markTutorial = () => {
     if (!(state.tutorials ?? []).includes(gameId)) update((s) => void (s.tutorials = [...(s.tutorials ?? []), gameId]))
@@ -100,7 +101,8 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
               className="skip"
               onClick={() => {
                 markTutorial()
-                setPhase('play')
+                setPracticeOk('skip')
+                setPhase('practiceDone')
               }}
             >
               練習をとばす
@@ -113,7 +115,7 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
               key={`p${practiceRun}`}
               products={products}
               onDone={(score) => {
-                setPracticeOk(score > 0)
+                setPracticeOk(score > 0 ? 'ok' : 'ng')
                 markTutorial()
                 setPhase('practiceDone')
               }}
@@ -122,7 +124,13 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
         ) : (
           <div className="practice-done">
             <h2>練習おわり！</h2>
-            <p>{practiceOk ? 'できました。この調子で本番にいきましょう。' : 'だいじょうぶ。やり方がわかれば本番でできます。'}</p>
+            <p>
+              {practiceOk === 'ok'
+                ? 'できました。この調子で本番にいきましょう。'
+                : practiceOk === 'skip'
+                  ? 'やり方がわからなくなったら、「もう一度練習する」でいつでも練習できます。'
+                  : 'だいじょうぶ。やり方がわかれば本番でできます。'}
+            </p>
             <p className="note">本番は全{game.questions}問です。正解が続くと、少しずつ難しくなります。</p>
             <button
               className="btn play"
@@ -368,6 +376,18 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
         >
           {needPractice ? '練習してから始める' : BRAND.start}
         </button>
+        {needPractice && (
+          <button
+            className="btn ghost"
+            onClick={() => {
+              sfx('tap')
+              markTutorial()
+              setPhase('play')
+            }}
+          >
+            練習せずに始める
+          </button>
+        )}
       </div>
     </div>
   )
