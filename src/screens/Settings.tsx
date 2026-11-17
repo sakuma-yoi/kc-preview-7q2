@@ -87,6 +87,12 @@ export function Settings({ onClose }: { onClose: () => void }) {
           <button onClick={() => update((s) => void (s.dayOffset += 1))}>1日すすめる</button>
           <button onClick={() => update((s) => void (s.dayOffset = 0))}>今日にもどす</button>
         </div>
+        <Toggle
+          id="set-level"
+          label="脳トレ中にレベルを表示する"
+          on={state.settings.showLevel !== false}
+          onChange={(v) => update((s) => void (s.settings.showLevel = v))}
+        />
         <div className="ops-row">
           <button onClick={() => update((s) => void addStamps(s, 5))}>スタンプ+5</button>
           <button onClick={() => update((s) => void (s.tickets += 1))}>チケット+1</button>

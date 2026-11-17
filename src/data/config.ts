@@ -92,4 +92,4 @@ export const ODDONE_LATE: 'color' | 'flip' = 'color'
 /** 冷凍庫脳年齢 */
 export const brainAge = (score: number) => Math.round(20 + (100 - score) * 0.5)
 
-export const APP_VERSION = '1.4.0'
+export const APP_VERSION = '1.5.0'

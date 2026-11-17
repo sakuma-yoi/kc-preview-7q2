@@ -50,7 +50,8 @@ export type State = {
   weekBonus: string[]
   monthBonus: string[]
   gameProducts: Record<string, string[]>
-  settings: { big: boolean; sound: boolean }
+  /** showLevel：脳トレ中にいまのレベルを出すか（試しに表示。省略時は出す） */
+  settings: { big: boolean; sound: boolean; showLevel?: boolean }
   /** 試作用：日付をずらす日数 */
   dayOffset: number
 }
@@ -75,7 +76,7 @@ export const initialState = (): State => ({
   weekBonus: [],
   monthBonus: [],
   gameProducts: {},
-  settings: { big: false, sound: false },
+  settings: { big: false, sound: false, showLevel: true },
   dayOffset: 0,
 })
 

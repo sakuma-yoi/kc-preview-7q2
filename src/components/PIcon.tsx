@@ -12,6 +12,44 @@ for (const [path, url] of Object.entries(FILES)) CUSTOM[path.split('/').pop()!.r
 const plate = <ellipse cx="24" cy="33" rx="21" ry="10" fill="#fff" stroke="#c9dde7" strokeWidth="1.5" />
 
 const ART: Record<string, ReactNode> = {
+  // ---- 一般の商品（損得勘定で使う） ----
+  'g-rice': (
+    <>
+      <path d="M11 10h26l3 34H8Z" fill="#f4ecd6" stroke="#c9b98f" strokeWidth="1.5" />
+      <path d="M11 10q13-6 26 0" fill="none" stroke="#c9b98f" strokeWidth="2" />
+      <rect x="13" y="20" width="22" height="13" rx="3" fill="#3d8c3d" />
+      <path d="M18 30q6-8 12 0" stroke="#fff" strokeWidth="2" fill="none" />
+      <g fill="#fff">
+        <ellipse cx="21" cy="25" rx="1.6" ry="2.4" />
+        <ellipse cx="25" cy="23.5" rx="1.6" ry="2.4" />
+        <ellipse cx="29" cy="25" rx="1.6" ry="2.4" />
+      </g>
+    </>
+  ),
+  'g-soy': (
+    <>
+      <rect x="20" y="3" width="8" height="6" rx="1.5" fill="#c9372c" />
+      <path d="M19 9h10v6l5 6v23a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V21l5-6Z" fill="#6b3a1f" />
+      <rect x="16" y="24" width="16" height="13" rx="2" fill="#fff5d6" />
+      <path d="M20 28h8M20 32h6" stroke="#6b3a1f" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  'g-mayo': (
+    <>
+      <path d="M17 12q0-4 7-4t7 4l2 30q0 4-9 4t-9-4Z" fill="#fff8e1" stroke="#e7d9a8" strokeWidth="1.5" />
+      <rect x="20" y="3" width="8" height="6" rx="2" fill="#c9372c" />
+      <path d="M17.5 22h13l.5 9h-14Z" fill="#c9372c" />
+      <path d="M21 26.5h6" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+  'g-miso': (
+    <>
+      <path d="M8 18h32l-3 24q-.5 3-3.5 3h-19Q11.500 45 11 42Z" fill="#fff" stroke="#c9dde7" strokeWidth="1.5" />
+      <rect x="6" y="12" width="36" height="7" rx="3" fill="#c46a1b" />
+      <rect x="15" y="25" width="18" height="12" rx="2" fill="#f2d39b" />
+      <path d="M19 31h10" stroke="#c46a1b" strokeWidth="2.5" strokeLinecap="round" />
+    </>
+  ),
   gyoza: (
     <>
       <path d="M3 33q4-5 10-4l22-1q8 0 10 5-4 7-21 7T3 33Z" fill="#e7b96a" opacity=".75" />
@@ -245,6 +283,17 @@ export function PIcon({ id }: { id: string }) {
   return (
     <svg className="picon" viewBox="0 0 48 48" width="1em" height="1em" aria-hidden="true">
       {art}
+    </svg>
+  )
+}
+
+/** 販促商品ではない一般の商品の、色つきの箱の絵（買い物リスト暗記の売り場で使う） */
+export function GenericPack({ color }: { color: string }) {
+  return (
+    <svg className="picon" viewBox="0 0 48 48" width="1em" height="1em" aria-hidden="true">
+      <path d="M8 14 24 7l16 7v22l-16 7-16-7Z" fill={color} />
+      <path d="M8 14l16 7 16-7M24 21v22" fill="none" stroke="#fff" strokeOpacity=".55" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M12 24l8 3.5v6L12 30Z" fill="#fff" fillOpacity=".85" />
     </svg>
   )
 }

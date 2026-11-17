@@ -1,7 +1,8 @@
 // 盤面を操作する脳トレ：間違い探し・商品神経衰弱・買い物リスト暗記・商品名の並べ替え
 
 import { useEffect, useMemo, useState } from 'react'
-import { PIcon } from '../components/PIcon'
+import { GenericPack, PIcon } from '../components/PIcon'
+import { SHELVES, shelfOf, type ShelfId } from '../data/shelves'
 import { shortName, type Product } from '../data/products'
 import { sfx } from '../lib/sfx'
 import { randInt, sample, shuffle } from '../lib/util'
@@ -112,15 +113,37 @@ export function Diff({ products, onDone }: GameProps) {
 
 /* ---------- 商品神経衰弱 ---------- */
 
-function PairsRound({ items, cols, onEnd }: { items: Product[]; cols: number; onEnd: (tries: number) => void }) {
+function PairsRound({
+  items,
+  cols,
+  previewMs,
+  onReady,
+  onEnd,
+}: {
+  items: Product[]
+  cols: number
+  previewMs: number
+  onReady: () => void
+  onEnd: (tries: number) => void
+}) {
   const cards = useMemo(() => shuffle([...items, ...items]), []) // eslint-disable-line react-hooks/exhaustive-deps
+  // 最初の数秒は、すべてのペアの片方だけを表にして見せる
+  const shown = useMemo(() => items.map((p) => cards.indexOf(p)), []) // eslint-disable-line react-hooks/exhaustive-deps
+  const [preview, setPreview] = useState(true)
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      setPreview(false)
+      onReady()
+    }, previewMs)
+    return () => window.clearTimeout(t)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const [open, setOpen] = useState<number[]>([])
   const [matched, setMatched] = useState<number[]>([])
   const [tries, setTries] = useState(0)
   const [lock, setLock] = useState(false)
 
   const flip = (i: number) => {
-    if (lock || open.includes(i) || matched.includes(i)) return
+    if (preview || lock || open.includes(i) || matched.includes(i)) return
     sfx('tap')
     const next = [...open, i]
     setOpen(next)
@@ -144,17 +167,28 @@ function PairsRound({ items, cols, onEnd }: { items: Product[]; cols: number; on
 
   return (
     <>
-      <p className="hud">
-        <span>
-          そろえた <b>{matched.length / 2}</b> / {items.length}
-        </span>
-        <span>
-          めくった回数 <b>{tries}</b>
-        </span>
-      </p>
+      {preview ? (
+        <>
+          <p className="hud">
+            <span>表になっているカードを覚えてください</span>
+          </p>
+          <div className="timer">
+            <i style={{ animationDuration: `${previewMs}ms` }} />
+          </div>
+        </>
+      ) : (
+        <p className="hud">
+          <span>
+            そろえた <b>{matched.length / 2}</b> / {items.length}
+          </span>
+          <span>
+            めくった回数 <b>{tries}</b>
+          </span>
+        </p>
+      )}
       <div className={`grid c${cols} pairs`}>
         {cards.map((p, i) => {
-          const up = open.includes(i) || matched.includes(i)
+          const up = open.includes(i) || matched.includes(i) || (preview && shown.includes(i))
           return (
             <button
               key={i}
@@ -182,6 +216,8 @@ export function Pairs({ products, onDone }: GameProps) {
         key={r.round}
         items={items}
         cols={lv.cols}
+        previewMs={lv.previewMs}
+        onReady={r.startClock}
         onEnd={(tries) => {
           // 余分にめくった回数が少なければ、次はペアを増やす
           const extra = Math.max(0, tries - items.length)
@@ -194,27 +230,51 @@ export function Pairs({ products, onDone }: GameProps) {
 
 /* ---------- 買い物リスト暗記 ---------- */
 
-function MemoRound({ products, n, shelf, onEnd, onReady }: { products: Product[]; n: number; shelf: number; onEnd: (correct: string[]) => void; onReady: () => void }) {
+type StoreItem = { key: string; name: string; shelf: ShelfId; productId?: string }
+
+function MemoRound({
+  products,
+  n,
+  perShelf,
+  onEnd,
+  onReady,
+}: {
+  products: Product[]
+  n: number
+  perShelf: number
+  onEnd: (correctKeys: string[], productIds: string[]) => void
+  onReady: () => void
+}) {
   const q = useMemo(() => {
-    const pool = shuffle(products)
-    const list = pool.slice(0, n)
-    return { list, shelf: shuffle([...list, ...pool.slice(n, shelf)]) }
+    const promo: StoreItem[] = products.map((p) => ({ key: p.id, name: shortName(p), shelf: shelfOf(p), productId: p.id }))
+    const generic: StoreItem[] = SHELVES.flatMap((sh) => sh.generic.map((g) => ({ key: `g:${g}`, name: g, shelf: sh.id })))
+    // メモの半分以上は販促商品にする
+    const nPromo = Math.max(1, Math.ceil(n / 2))
+    const list = shuffle([...sample(promo, nPromo), ...sample(generic, n - nPromo)])
+    const shelves = Object.fromEntries(
+      SHELVES.map((sh) => {
+        const need = list.filter((x) => x.shelf === sh.id)
+        const rest = shuffle([...promo, ...generic].filter((x) => x.shelf === sh.id && !need.includes(x)))
+        return [sh.id, shuffle([...need, ...rest.slice(0, Math.max(0, perShelf - need.length))])]
+      }),
+    ) as Record<ShelfId, StoreItem[]>
+    return { list, shelves }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const lookMs = MEMO_LOOK_BASE_MS + n * MEMO_LOOK_PER_ITEM_MS
-  const [look, setLook] = useState(true)
-  const [picked, setPicked] = useState<string[]>([])
+  const [view, setView] = useState<'look' | 'map' | ShelfId>('look')
+  const [cart, setCart] = useState<StoreItem[]>([])
   const [over, setOver] = useState(false)
 
   useEffect(() => {
     const t = window.setTimeout(() => {
-      setLook(false)
+      setView('map')
       onReady()
     }, lookMs)
     return () => window.clearTimeout(t)
   }, [lookMs]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (look) {
+  if (view === 'look') {
     return (
       <div className="memo">
         <div className="timer">
@@ -222,52 +282,98 @@ function MemoRound({ products, n, shelf, onEnd, onReady }: { products: Product[]
         </div>
         <p className="memo-head">買い物メモ</p>
         <ul>
-          {q.list.map((p) => (
-            <li key={p.id}>{shortName(p)}</li>
+          {q.list.map((x) => (
+            <li key={x.key}>{x.name}</li>
           ))}
         </ul>
       </div>
     )
   }
 
-  const toggle = (id: string) => {
+  const inCart = (x: StoreItem) => cart.some((c) => c.key === x.key)
+  const toggle = (x: StoreItem) => {
     if (over) return
     sfx('tap')
-    setPicked(picked.includes(id) ? picked.filter((x) => x !== id) : picked.length < n ? [...picked, id] : picked)
+    setCart(inCart(x) ? cart.filter((c) => c.key !== x.key) : cart.length < n ? [...cart, x] : cart)
+  }
+  const checkout = () => {
+    setOver(true)
+    const ok = cart.filter((c) => q.list.some((x) => x.key === c.key))
+    onEnd(
+      ok.map((c) => c.key),
+      ok.flatMap((c) => (c.productId ? [c.productId] : [])),
+    )
+  }
+  const cartBar = (
+    <div className="cart">
+      <p>
+        買い物かご <b>{cart.length}</b> / {n}
+      </p>
+      <ul>
+        {cart.map((c) => (
+          <li key={c.key}>
+            <button onClick={() => toggle(c)} aria-label={`${c.name}をかごから出す`} disabled={over}>
+              {c.name} ×
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+
+  if (view === 'map') {
+    return (
+      <>
+        <p className="hud">
+          <span>売り場をえらんでください</span>
+        </p>
+        <div className="aisles">
+          {SHELVES.map((sh) => {
+            const count = cart.filter((c) => c.shelf === sh.id).length
+            return (
+              <button key={sh.id} className="aisle" style={{ borderTopColor: sh.color }} onClick={() => setView(sh.id)} disabled={over}>
+                <span className="aisle-icon" style={{ color: sh.color }}>
+                  <GenericPack color={sh.color} />
+                </span>
+                <strong>{sh.name}</strong>
+                {count > 0 && <em>かごに{count}</em>}
+              </button>
+            )
+          })}
+        </div>
+        {cartBar}
+        <button className="btn play" disabled={cart.length !== n || over} onClick={checkout}>
+          レジへ進む
+        </button>
+        {over && (
+          <p className="note center">
+            メモ：{q.list.map((x) => x.name).join('、')}
+          </p>
+        )}
+      </>
+    )
   }
 
+  const shelf = SHELVES.find((sh) => sh.id === view)!
   return (
     <>
-      <p className="hud">
-        <span>
-          えらんだ数 <b>{picked.length}</b> / {n}
-        </span>
-      </p>
-      <div className="grid c3 shelf">
-        {q.shelf.map((p) => {
-          const inList = q.list.includes(p)
-          return (
-            <button
-              key={p.id}
-              className={`tile small ${picked.includes(p.id) ? 'on' : ''} ${over && inList ? 'reveal' : ''}`}
-              onClick={() => toggle(p.id)}
-              aria-pressed={picked.includes(p.id)}
-            >
-              <span><PIcon id={p.id} /></span>
-              {shortName(p)}
-            </button>
-          )
-        })}
+      <div className="shelf-head" style={{ background: shelf.color }}>
+        <button onClick={() => setView('map')} aria-label="売り場の一覧にもどる">
+          ‹ 売り場
+        </button>
+        <strong>{shelf.name}</strong>
       </div>
-      <button
-        className="btn play"
-        disabled={picked.length !== n || over}
-        onClick={() => {
-          setOver(true)
-          onEnd(picked.filter((id) => q.list.some((p) => p.id === id)))
-        }}
-      >
-        これで決定
+      <div className="grid c3 shelf">
+        {q.shelves[shelf.id].map((x) => (
+          <button key={x.key} className={`tile small ${inCart(x) ? 'on' : ''}`} onClick={() => toggle(x)} aria-pressed={inCart(x)}>
+            <span>{x.productId ? <PIcon id={x.productId} /> : <GenericPack color={shelf.color} />}</span>
+            {x.name}
+          </button>
+        ))}
+      </div>
+      {cartBar}
+      <button className="btn ghost" onClick={() => setView('map')}>
+        売り場の一覧にもどる
       </button>
     </>
   )
@@ -275,16 +381,18 @@ function MemoRound({ products, n, shelf, onEnd, onReady }: { products: Product[]
 
 export function Memo({ products, onDone }: GameProps) {
   const r = useRounds(4, onDone, PACE.memo, MEMO.length)
-  const { items: n, shelf } = MEMO[r.level]
+  const { items: n, perShelf } = MEMO[r.level]
   return (
-    <Stage r={r} question="メモにあった商品を、全部えらんでください">
+    <Stage r={r} question="メモの商品を、売り場から探してかごに入れてください">
       <MemoRound
         key={r.round}
         products={products}
         n={n}
-        shelf={shelf}
+        perShelf={perShelf}
         onReady={r.startClock}
-        onEnd={(ids) => r.answer((25 * ids.length) / n, ids.length === n, 1500, ids, ids.length === n ? 'up' : ids.length >= n - 1 && n >= 3 ? 'keep' : 'miss')}
+        onEnd={(keys, ids) =>
+          r.answer((25 * keys.length) / n, keys.length === n, 2200, ids, keys.length === n ? 'up' : keys.length >= n - 1 && n >= 3 ? 'keep' : 'miss')
+        }
       />
     </Stage>
   )

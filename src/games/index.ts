@@ -3,6 +3,7 @@
 import type { ComponentType } from 'react'
 import { Anagram, Diff, Memo, Pairs } from './board'
 import type { GameProps } from './common'
+import { Change, Discount, Value } from './money'
 import { Freezer, OddOne, Range, Register } from './quiz'
 
 export const GAME_COMPONENTS: Record<string, ComponentType<GameProps>> = {
@@ -13,5 +14,8 @@ export const GAME_COMPONENTS: Record<string, ComponentType<GameProps>> = {
   memo: Memo,
   range: Range,
   oddone: OddOne,
+  change: Change,
+  discount: Discount,
+  value: Value,
   anagram: Anagram,
 }

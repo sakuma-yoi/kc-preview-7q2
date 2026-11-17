@@ -22,19 +22,22 @@ export type Game = {
 
 export const GAMES: Game[] = [
   { id: 'freezer', name: '冷凍庫の中身記憶', category: '記憶', summary: '3秒見た冷凍庫の中身を答える', rule: '冷凍庫の中を数秒だけ見せます。とびらが閉まったら、入っていた商品を答えてください。正解が続くと、商品が増えたり「入っていなかった商品」を聞かれたりします。', questions: 5, minutes: 1, icon: '🧊', free: true, minProducts: 8 },
-  { id: 'register', name: 'お会計チャレンジ', category: '計算', summary: 'レシートの合計金額を暗算', rule: 'レシートの商品を全部たして、合計金額を4つの中から選んでください。正解が続くと、商品が増えて、選択肢の金額も近くなります。', questions: 5, minutes: 2, icon: '🧾', free: true, minProducts: 4 },
+  { id: 'register', name: 'お会計チャレンジ', category: '計算', summary: 'レジの合計金額を暗算', rule: 'レジに通る商品の値段をたして、合計を答えます。はじめは「何百円台か」だけでOK。正解が続くと、合計金額そのものを答える問題になります。', questions: 5, minutes: 2, icon: '🧾', free: true, minProducts: 4 },
   { id: 'diff', name: '間違い探し', category: '観察', summary: '2枚の絵の違いを3つ探す', rule: '上の「おてほん」と下の絵をくらべて、違うところを下の絵から全部見つけてください。おてつきは4回までです。全部見つけると、次の絵は少し大きくなります。', questions: 3, minutes: 2, icon: '🔍', minProducts: 6 },
-  { id: 'pairs', name: '商品神経衰弱', category: '記憶', summary: '商品のペアをそろえる', rule: 'カードを2枚ずつめくって、同じ商品のペアをそろえてください。少ない回数でそろえるほど高得点で、次はカードが増えます。', questions: 3, minutes: 2, icon: '🃏', minProducts: 6 },
-  { id: 'memo', name: '買い物リスト暗記', category: '記憶', summary: 'メモを覚えて売り場で選ぶ', rule: '買い物メモを数秒で覚えます。メモが消えたら、売り場からメモにあった商品を全部選んでください。正解が続くと、メモの品数が増えます。', questions: 4, minutes: 2, icon: '📝', minProducts: 9 },
-  { id: 'range', name: 'レンジ時間の計算', category: '計算', summary: '温め時間の合計を答える', rule: '商品を順番に温めます。レンジの時間を全部たすと何分何秒になるか、4つの中から選んでください。正解が続くと、商品が増えて、選択肢も近くなります。', questions: 5, minutes: 1, icon: '⏲️', minProducts: 4 },
+  { id: 'pairs', name: '商品神経衰弱', category: '記憶', summary: '商品のペアをそろえる', rule: '最初の数秒、ペアの片方だけが表になります。覚えたら、カードを2枚ずつめくって同じ商品のペアをそろえてください。少ない回数でそろえるほど高得点で、次はカードが増えます。', questions: 3, minutes: 2, icon: '🃏', minProducts: 6 },
+  { id: 'memo', name: '買い物リスト暗記', category: '記憶', summary: 'メモを覚えて、売り場から探す', rule: '買い物メモを数秒で覚えます。メモが消えたら、冷凍・チルドの売り場をまわって、メモの商品を全部かごに入れてください。正解が続くと、メモの品数が増えます。', questions: 4, minutes: 2, icon: '📝', minProducts: 9 },
+  { id: 'range', name: 'レンジ時間の計算', category: '計算', summary: 'W数がちがうときの温め時間を答える', rule: 'パッケージには「500Wで3分」のように書いてあります。家のレンジのW数だと何分何秒になるか、4つの中から選んでください。', questions: 5, minutes: 1, icon: '⏲️', minProducts: 4 },
   { id: 'oddone', name: '仲間はずれ探し', category: '観察', summary: '1つだけ違う商品を探す', rule: '並んだ商品の中から、1つだけ違うものを見つけてください。2回まで押せます。正解が続くと数が増え、少しだけ違うものを探す問題になります。', questions: 5, minutes: 1, icon: '👀', minProducts: 4 },
+  { id: 'change', name: 'お釣りマスター', category: '計算', summary: 'お釣りの枚数が少なくなるように払う', rule: 'レジの金額を見て、お金をタップして払います。出す枚数とお釣りの枚数が、合わせていちばん少なければ満点です。どのお金も何枚でも出せます。', questions: 5, minutes: 2, icon: '💴', minProducts: 4 },
+  { id: 'discount', name: '割引計算', category: '計算', summary: '割引シールのあとのお値段を答える', rule: '値札と割引シール（半額・〇円引・〇%OFF・〇割引）を見て、割引のあとのお値段を4つの中から選んでください。正解が続くと、シールが2枚になることもあります。', questions: 5, minutes: 1, icon: '🏷️', minProducts: 4 },
+  { id: 'value', name: '損得勘定', category: '計算', summary: '大きさと値段から、お得なほうを選ぶ', rule: '大きさと値段のちがう商品をくらべて、いちばんお得なものを、時間内にぱっと選んでください。答えたあとに100gあたりの値段が出ます。', questions: 5, minutes: 1, icon: '⚖️', minProducts: 1 },
   { id: 'anagram', name: '商品名の並べ替え', category: '言葉', summary: 'バラバラの文字を商品名に並べ替える', rule: 'バラバラになった文字を順番にタップして、商品の名前を作ってください。1問につき2回まで挑戦できます。', questions: 5, minutes: 2, icon: '🔤', minProducts: 5 },
 ]
 
 export const gameById = (id: string) => GAMES.find((g) => g.id === id)!
 
 /** あたらしい脳トレが届く順番（分類がかたよらないように並べる） */
-export const NEW_GAME_ORDER = ['diff', 'anagram', 'pairs', 'range', 'oddone', 'memo']
+export const NEW_GAME_ORDER = ['diff', 'anagram', 'discount', 'pairs', 'range', 'value', 'oddone', 'change', 'memo']
 
 const all = PRODUCTS.map((p) => p.id)
 
@@ -48,6 +51,9 @@ export const DEFAULT_GAME_PRODUCTS: Record<string, string[]> = {
   // レンジで温める商品だけ
   range: PRODUCTS.filter((p) => p.rangeSec).map((p) => p.id),
   oddone: all,
+  change: all,
+  discount: all,
+  value: all,
   // 名前が6文字以下の商品だけ
   anagram: PRODUCTS.filter((p) => [...shortName(p)].length <= 6).map((p) => p.id),
 }

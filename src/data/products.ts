@@ -28,6 +28,8 @@ export type Product = {
   rangeSec?: number
   /** 購入ページのURL。書くと商品詳細の「買えるお店を見る」がリンクになる */
   buyUrl?: string
+  /** 買い物リスト暗記で並ぶ棚（shelves.ts）。書かなければジャンルから決まる */
+  shelf?: 'veg' | 'side' | 'meal' | 'snack' | 'ice' | 'deli'
 }
 
 export const GENRES: Genre[] = ['ごはん', 'おかず', '麺', '軽食', 'デザート']
@@ -44,7 +46,7 @@ export const PRODUCTS: Product[] = [
   { id: 'curry', name: 'ビーフカレー', icon: '🍛', type: 'チルド', genre: 'ごはん', copy: '牛肉の旨みが溶けこんだ中辛。', desc: '炒めたまねぎの甘みと、スパイスの香りが楽しめるカレーです。', amount: '1食 200g', cook: 'レンジで1分30秒', price: 240, rangeSec: 90 },
   { id: 'potato', name: 'フライドポテト', icon: '🍟', type: '冷凍', genre: '軽食', copy: 'おやつにも、おつまみにも。', desc: '皮つきのまま太めにカットした、ほくほくのポテトです。', amount: '400g', cook: 'トースターで約8分', price: 220 },
   { id: 'takoyaki', name: 'たこ焼き', icon: '🐙', type: '冷凍', genre: '軽食', copy: '外はふんわり、中はとろり。', desc: '大きめのたこが入った、だしの効いたたこ焼きです。', amount: '20個入り', cook: 'レンジで3分', price: 290, rangeSec: 180 },
-  { id: 'broccoli', name: 'ブロッコリー', icon: '🥦', type: '冷凍', genre: 'おかず', copy: '使いたい分だけ、彩りをプラス。', desc: '下ゆで済みなので、お弁当やサラダにすぐ使えます。', amount: '250g', cook: 'レンジで1分10秒', price: 200, rangeSec: 70 },
+  { id: 'broccoli', name: 'ブロッコリー', icon: '🥦', type: '冷凍', genre: 'おかず', shelf: 'veg', copy: '使いたい分だけ、彩りをプラス。', desc: '下ゆで済みなので、お弁当やサラダにすぐ使えます。', amount: '250g', cook: 'レンジで1分10秒', price: 200, rangeSec: 70 },
   { id: 'hamburg', name: 'ハンバーグ', icon: '🍖', type: 'チルド', genre: 'おかず', copy: 'ふっくら、デミグラスソース仕立て。', desc: '牛と豚の合いびき肉を、じっくり焼き上げました。', amount: '2個入り', cook: 'レンジで2分20秒', price: 300, rangeSec: 140 },
   { id: 'oden', name: 'おでん', icon: '🍢', type: 'チルド', genre: 'おかず', copy: 'だしがしみた、7種の具材。', desc: '大根・たまご・ちくわなどを、かつおと昆布のだしで煮込みました。', amount: '1袋 2人前', cook: 'お鍋で約5分', price: 360 },
   { id: 'ice', name: 'バニラアイス', icon: '🍨', type: '冷凍', genre: 'デザート', copy: 'ミルクのコクと、やさしい甘さ。', desc: '北海道産の生クリームを使った、なめらかなアイスです。', amount: '6個入り', cook: 'そのまま', price: 270 },

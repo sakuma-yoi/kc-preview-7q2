@@ -17,7 +17,10 @@ export const PACE = {
   oddone: { fast: 2.5, slow: 10 },
   diff: { fast: 12, slow: 50 },
   pairs: { fast: 20, slow: 70 },
-  memo: { fast: 5, slow: 18 },
+  memo: { fast: 10, slow: 35 },
+  change: { fast: 10, slow: 40 },
+  discount: { fast: 6, slow: 20 },
+  value: { fast: 2, slow: 7 },
   anagram: { fast: 4, slow: 16 },
 }
 
@@ -30,22 +33,32 @@ export const FREEZER = [
   { items: 5, lookSec: 3.5, choices: 4, askOutside: true },
 ]
 
-/** お会計チャレンジ。items＝レシートの商品数、gaps＝まちがいの選択肢と正解の差（円） */
+/**
+ * お会計チャレンジ。items＝レジを通る商品数
+ * band＝true なら「合計は何百円台？」と、だいたいの金額を答える。false なら合計金額そのものを答える
+ * gaps＝まちがいの選択肢と正解の差（円）。band のときは使わない
+ */
 export const REGISTER = [
-  { items: 2, gaps: [100, 200] },
-  { items: 2, gaps: [50, 100] },
-  { items: 3, gaps: [50, 100] },
-  { items: 3, gaps: [20, 50] },
-  { items: 4, gaps: [10, 20, 50] },
+  { items: 2, band: true, gaps: [] as number[] },
+  { items: 3, band: true, gaps: [] as number[] },
+  { items: 2, band: false, gaps: [50, 100] },
+  { items: 3, band: false, gaps: [50, 100] },
+  { items: 3, band: false, gaps: [20, 50, 100] },
 ]
+/** レジで商品を1つ読み取る間隔（ミリ秒） */
+export const REGISTER_SCAN_MS = 700
 
-/** レンジ時間の計算。items＝温める商品数、gaps＝まちがいの選択肢と正解の差（秒） */
+/**
+ * レンジ時間の計算。パッケージに書いてある W数と時間から、ちがう W数での時間を答える
+ * watts＝出題に使う［書いてある W数, 家のレンジの W数］の組み合わせ、gaps＝まちがいの選択肢と正解の差（秒）
+ * hint＝「W数が大きいほど時間は短い」のヒントを出すか
+ */
 export const RANGE = [
-  { items: 2, gaps: [60, 120] },
-  { items: 2, gaps: [30, 60] },
-  { items: 2, gaps: [20, 30] },
-  { items: 3, gaps: [30, 60] },
-  { items: 3, gaps: [10, 20, 30] },
+  { watts: [[500, 1000], [1000, 500]], gaps: [30, 60], hint: true },
+  { watts: [[600, 500], [500, 600]], gaps: [30, 60], hint: true },
+  { watts: [[600, 500], [500, 600]], gaps: [10, 20, 30], hint: false },
+  { watts: [[500, 700], [700, 500], [600, 700]], gaps: [10, 20, 30], hint: false },
+  { watts: [[500, 700], [700, 600], [600, 1000], [1000, 700]], gaps: [10, 20], hint: false },
 ]
 
 /**
@@ -72,24 +85,62 @@ export const DIFF = [
 /** 間違い探しの、おてつきできる回数 */
 export const DIFF_MISSES = 4
 
-/** 商品神経衰弱。pairs＝ペアの数、cols＝横の数 */
+/** 商品神経衰弱。pairs＝ペアの数、cols＝横の数、previewMs＝最初にペアの片方を表で見せる時間（ミリ秒） */
 export const PAIRS = [
-  { pairs: 3, cols: 3 },
-  { pairs: 4, cols: 4 },
-  { pairs: 5, cols: 5 },
-  { pairs: 6, cols: 4 },
+  { pairs: 3, cols: 3, previewMs: 3500 },
+  { pairs: 4, cols: 4, previewMs: 4000 },
+  { pairs: 5, cols: 5, previewMs: 4500 },
+  { pairs: 6, cols: 4, previewMs: 4500 },
 ]
 /** 神経衰弱で、そろわなかったカードを裏に戻すまでの時間（ミリ秒） */
 export const PAIRS_FLIP_BACK_MS = 1100
 
-/** 買い物リスト暗記。items＝メモの品数、shelf＝売り場に並ぶ数 */
+/** 買い物リスト暗記。items＝メモの品数、perShelf＝1つの棚に並ぶ商品の数（売り場は src/data/shelves.ts） */
 export const MEMO = [
-  { items: 2, shelf: 6 },
-  { items: 3, shelf: 6 },
-  { items: 3, shelf: 9 },
-  { items: 4, shelf: 9 },
-  { items: 5, shelf: 9 },
+  { items: 2, perShelf: 5 },
+  { items: 3, perShelf: 6 },
+  { items: 3, perShelf: 7 },
+  { items: 4, perShelf: 8 },
+  { items: 5, perShelf: 8 },
 ]
 /** メモを見られる時間＝ MEMO_LOOK_BASE_MS ＋ 品数 × MEMO_LOOK_PER_ITEM_MS */
 export const MEMO_LOOK_BASE_MS = 3500
 export const MEMO_LOOK_PER_ITEM_MS = 900
+
+/**
+ * お釣りマスター。items＝レジを通る商品数、tax＝税込み（8%、1円未満切り捨て）にするか
+ * 「出す枚数＋お釣りの枚数」がいちばん少なければ満点。1枚多いごとに CHANGE_PENALTY 点引く
+ */
+export const CHANGE = [
+  { items: 1, tax: false },
+  { items: 2, tax: false },
+  { items: 2, tax: true },
+  { items: 3, tax: true },
+  { items: 4, tax: true },
+]
+export const CHANGE_PENALTY = 5
+
+/**
+ * 割引計算。kinds＝出る割引の種類
+ *   half＝半額、yen＝円引き、pct＝％引き、wari＝割引、double＝％引きのあとさらに円引き
+ * gaps＝まちがいの選択肢と正解の差（円）
+ */
+export const DISCOUNT = [
+  { kinds: ['half', 'yen'], yen: [50, 100], pct: [] as number[], gaps: [50, 100] },
+  { kinds: ['half', 'yen', 'wari'], yen: [30, 50, 100], pct: [10, 20], gaps: [30, 50] },
+  { kinds: ['pct', 'wari', 'yen'], yen: [30, 50], pct: [10, 20, 30], gaps: [20, 30, 50] },
+  { kinds: ['pct', 'wari'], yen: [], pct: [15, 25, 30, 40], gaps: [10, 20, 30] },
+  { kinds: ['pct', 'double'], yen: [20, 30, 50], pct: [10, 20, 30], gaps: [10, 20] },
+]
+
+/**
+ * 損得勘定。options＝くらべる商品の数、gap＝いちばんお得な商品と次の商品の、100gあたりの値段の差（割合）
+ * timeSec＝答えられる時間（秒）。時間切れは不正解
+ */
+export const VALUE = [
+  { options: 2, gap: [0.35, 0.5], timeSec: 10 },
+  { options: 2, gap: [0.2, 0.3], timeSec: 9 },
+  { options: 2, gap: [0.1, 0.18], timeSec: 8 },
+  { options: 3, gap: [0.12, 0.2], timeSec: 9 },
+  { options: 3, gap: [0.05, 0.1], timeSec: 8 },
+]

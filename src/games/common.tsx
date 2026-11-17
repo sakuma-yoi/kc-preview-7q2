@@ -3,6 +3,7 @@ import { SCORE_ACCURACY, SCORE_SPEED } from '../data/config'
 import { MISSES_TO_DOWN } from '../data/levels'
 import type { Product } from '../data/products'
 import { sfx } from '../lib/sfx'
+import { useStore } from '../store'
 import { shuffle } from '../lib/util'
 
 /** 点数の内訳 */
@@ -99,17 +100,26 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
     }, delay)
   }
 
-  return { round, level, total, mark, see, startClock, answer }
+  return { round, level, levels, total, mark, see, startClock, answer }
 }
 
 type StageProps = { r: ReturnType<typeof useRounds>; question: ReactNode; children: ReactNode }
 
 export function Stage({ r, question, children }: StageProps) {
+  const { state } = useStore()
+  // いまの難しさ（試しに表示。運営メニューで消せる）
+  const showLevel = state.settings.showLevel !== false && r.levels > 1
   return (
     <div className="stage">
       <div className="stage-top">
         <span className="q-no">
           第{r.round + 1}問<small> / 全{r.total}問</small>
+          {showLevel && (
+            <span className="lv-chip" key={r.level}>
+              レベル {r.level + 1}
+              <small> / {r.levels}</small>
+            </span>
+          )}
         </span>
         <span className="q-dots" aria-hidden="true">
           {Array.from({ length: r.total }, (_, i) => (
@@ -117,7 +127,9 @@ export function Stage({ r, question, children }: StageProps) {
           ))}
         </span>
       </div>
-      <p className="q-text">{question}</p>
+      <p className="q-text">
+        <span>{question}</span>
+      </p>
       {children}
       {r.mark && (
         <div className={`mark ${r.mark}`} role="status">
