@@ -200,7 +200,16 @@ function PairsRound({
               onClick={() => flip(i)}
               aria-label={up ? shortName(p) : `カード ${i + 1}`}
             >
-              {up ? <span><PIcon id={p.id} /></span> : <i>？</i>}
+              {up ? (
+                <>
+                  <span>
+                    <PIcon id={p.id} />
+                  </span>
+                  <small className="card-name">{shortName(p)}</small>
+                </>
+              ) : (
+                <i>？</i>
+              )}
             </button>
           )
         })}
@@ -250,8 +259,12 @@ function MemoRound({
   onReady: () => void
 }) {
   const q = useMemo(() => {
-    const promo: StoreItem[] = products.map((p) => ({ key: p.id, name: shortName(p), shelf: shelfOf(p), productId: p.id }))
-    const generic: StoreItem[] = SHELVES.flatMap((sh) => sh.generic.map((g) => ({ key: `g:${g}`, name: g, shelf: sh.id })))
+    // 呼び名が同じ商品（ふつうの袋と大袋など）は、どちらか1つだけ売り場に出す
+    const names = new Set<string>()
+    const promo: StoreItem[] = shuffle(products)
+      .filter((p) => !names.has(shortName(p)) && !!names.add(shortName(p)))
+      .map((p) => ({ key: p.id, name: shortName(p), shelf: shelfOf(p), productId: p.id }))
+    const generic: StoreItem[] = SHELVES.flatMap((sh) => sh.generic.filter((g) => !names.has(g)).map((g) => ({ key: `g:${g}`, name: g, shelf: sh.id })))
     // メモの半分以上は販促商品にする
     const nPromo = Math.max(1, Math.ceil(n / 2))
     const list = shuffle([...sample(promo, nPromo), ...sample(generic, n - nPromo)])

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pack } from '../components/Pack'
+import { Thumb } from '../components/Pack'
 import { PIcon } from '../components/PIcon'
 import { Sheet } from '../components/Sheet'
 import { featuredFor, STAR_STEPS, starsOf } from '../data/config'
@@ -69,7 +69,7 @@ export function Zukan({ onProduct }: Props) {
               <li key={id}>
                 <button onClick={() => (ok ? onProduct(id) : setHint(p))}>
                   <span className={ok ? '' : 'shadow'} aria-hidden="true">
-                    {ok ? <Pack id={p.id} /> : <PIcon id={p.id} />}
+                    {ok ? <Thumb id={p.id} /> : <PIcon id={p.id} />}
                   </span>
                   <strong>{ok ? shortName(p) : 'この商品を探そう！'}</strong>
                 </button>
@@ -108,7 +108,7 @@ export function Zukan({ onProduct }: Props) {
                 onClick={() => (ok ? onProduct(p.id) : toast('まだ見つけていません。脳トレで出会うと登録されます'))}
               >
                 {isNew && <em>はっけん！</em>}
-                <span aria-hidden="true">{ok ? <Pack id={p.id} /> : '🔒'}</span>
+                <span aria-hidden="true">{ok ? <Thumb id={p.id} /> : '🔒'}</span>
                 <strong>{ok ? shortName(p) : '？？？'}</strong>
                 {ok && <Stars n={starsOf(state.met[p.id] ?? 0)} />}
               </button>

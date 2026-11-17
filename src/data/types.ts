@@ -50,6 +50,8 @@ export type Catalog = {
   lookalike: [string, string][]
   shelves: Shelf[]
   valueKinds: ValueKind[]
-  /** 商品画像（id → URL）。パッケージと脳トレの絵の両方に使う。src/assets/ の画像より優先 */
+  /** パッケージ画像（id → URL）。商品詳細に出る。src/assets/products/ の画像より優先 */
   images: Record<string, string>
+  /** 小さく出すときの絵（id → URL）。脳トレ・図鑑の一覧・バナー・クーポンに出る。中身の写真を正方形に切り抜いたものなど。src/assets/icons/ の画像より優先 */
+  icons: Record<string, string>
 }

@@ -30,10 +30,12 @@ SINGLE=1 npx vite build --outDir dist-single   # 確認用の1ファイル版（
    - `rangeSec` はレンジの温め時間（秒）。書いた商品だけ「レンジ時間の計算」に出る。
    - `buyUrl` を書くと、商品詳細の「買えるお店を見る」がリンクになる。
    - `isNew: true` の商品は NEW の印が付き、購入スタンプが2個になる。
-2. 同じファイルの残りを合わせる：`genres`（図鑑のジャンル）、`banner`（ホームのおすすめ）、`featuredByMonth`（図鑑の月替わり特集）、`bento`（お弁当の具材記憶）、`lookalike`（仲間はずれ探しの似た商品）、`shelves`（買い物リスト暗記の棚）、`valueKinds`（損得勘定）、`images`（商品画像）。
+2. 同じファイルの残りを合わせる：`genres`（図鑑のジャンル）、`banner`（ホームのおすすめ）、`featuredByMonth`（図鑑の月替わり特集）、`bento`（お弁当の具材記憶）、`lookalike`（仲間はずれ探しの似た商品）、`shelves`（買い物リスト暗記の棚）、`valueKinds`（損得勘定）、`images`・`icons`（商品画像）。
 3. 画像
-   - `images` に書いた画像は、パッケージと脳トレの絵の両方に使う。
-   - `images` に書かない場合：パッケージ画像は `src/assets/products/<id>.png`、脳トレ用の小さい絵は `src/assets/icons/<id>.svg` に置く（png・webp も可）。どちらもなければ `src/components/PIcon.tsx` の絵（なければ絵文字）。
+   - `images`：パッケージ画像。商品詳細（図鑑で商品を開いたとき）に出る。
+   - `icons`：小さく出すときの絵。脳トレ・図鑑の一覧・バナー・クーポンに出る。袋の写真は小さいと見分けにくいので、中身の写真を正方形に切り抜いたものがおすすめ。角が丸くなり、ジャンルの色の枠がつく（色は `src/data/products.ts` の `GENRE_COLOR`）。
+   - どちらにも書かない場合：パッケージ画像は `src/assets/products/<id>.png`、小さい絵は `src/assets/icons/<id>.svg` に置く（png・webp も可）。どちらもなければ `src/components/PIcon.tsx` の絵（なければ絵文字）。
+   - 呼び名（`shortName`）は「大袋」などをつけず、中身の名前にする。同じ呼び名の商品は、買い物リスト暗記の売り場には1つだけ出る。
 4. `src/data/config.ts` の `ODDONE_LATE`：商品の絵の色を変えられないときは `'flip'` にする（仲間はずれ探しの後半が「さかさま」になる）。
 5. 新しい漢字を足したら `npm run fonts` でフォントを作り直す（Python と `pip install fonttools brotli` が必要）。
 

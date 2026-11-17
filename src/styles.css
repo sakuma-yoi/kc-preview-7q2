@@ -3044,3 +3044,51 @@ a.btn {
   font-size: 15px;
   color: var(--ink-soft);
 }
+
+/* ===== 商品の写真（中身を切り抜いたもの）：角を丸めて、ジャンルの色の枠 ===== */
+img.picon.photo {
+  object-fit: cover;
+  border-radius: 22%;
+  background: #fff;
+  box-shadow: 0 0 0 max(2px, 0.07em) var(--gc, var(--line));
+}
+.zukan-item .picon.photo,
+.featured .picon.photo {
+  width: 58px;
+  height: 58px;
+}
+.banner-icon .picon.photo {
+  width: 50px;
+  height: 50px;
+}
+.targets .picon.photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.product-hero .pack {
+  border-radius: 8px;
+}
+.card-btn.up {
+  align-content: center;
+  gap: 2px;
+}
+.card-name {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.card-name {
+  color: var(--ink);
+}
+/* 写真は絵文字の絵より細かいので、マスの中で大きめに出す */
+.card-btn .picon.photo {
+  width: 64px;
+  height: 64px;
+}
+.grid .cell .picon.photo {
+  width: 1.8em;
+  height: 1.8em;
+}

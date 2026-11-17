@@ -82,5 +82,6 @@ const catalog: Catalog = {
   shelves,
   valueKinds,
   images: {},
+  icons: {},
 }
 export default catalog

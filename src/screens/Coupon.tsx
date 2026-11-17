@@ -2,7 +2,7 @@ import JsBarcode from 'jsbarcode'
 import { useEffect, useRef, useState } from 'react'
 import { TicketIcon } from '../components/Icons'
 import { Sheet } from '../components/Sheet'
-import { Pack } from '../components/Pack'
+import { Thumb } from '../components/Pack'
 import { CARD_SIZE, COUPON_DAYS, COUPON_SOON_DAYS, couponApplies, COUPONS, type CouponDef } from '../data/config'
 import { PRODUCTS } from '../data/products'
 import { sfx } from '../lib/sfx'
@@ -36,7 +36,7 @@ function Targets({ def, onProduct }: { def: CouponDef; onProduct: (id: string) =
           (state.met[p.id] ?? 0) > 0 ? (
             <li key={p.id}>
               <button onClick={() => onProduct(p.id)} aria-label={p.name}>
-                <Pack id={p.id} />
+                <Thumb id={p.id} />
               </button>
             </li>
           ) : (

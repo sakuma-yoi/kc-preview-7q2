@@ -11,6 +11,17 @@ export const GENRES: Genre[] = catalog.genres
 
 export const PRODUCTS: Product[] = catalog.products
 
+/** ジャンルの色（商品の写真の枠） */
+export const GENRE_COLOR: Record<Genre, string> = {
+  やさい: '#3d8c3d',
+  くだもの: '#8a3fa8',
+  おかず: '#c46a1b',
+  軽食: '#c9372c',
+  ごはん: '#b8860b',
+  麺: '#a0522d',
+  デザート: '#1f86b8',
+}
+
 /** 脳トレの中で使う呼び名 */
 export const shortName = (p: Product) => p.shortName ?? p.name
 

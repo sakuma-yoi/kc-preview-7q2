@@ -1,6 +1,6 @@
 import BRAND from '#brand'
 import { useState } from 'react'
-import { Pack } from '../components/Pack'
+import { Thumb } from '../components/Pack'
 import { PIcon } from '../components/PIcon'
 import { QrIcon, Snow, TicketIcon } from '../components/Icons'
 import { Sheet } from '../components/Sheet'
@@ -182,7 +182,7 @@ export function Home({ fresh, onFresh, onPlay, onProduct }: Props) {
       {/* おすすめ商品 */}
       <button className="banner" onClick={() => onProduct(banner.id)}>
         <span className="banner-icon" aria-hidden="true">
-          <Pack id={banner.id} />
+          <Thumb id={banner.id} />
         </span>
         <span className="banner-text">
           <em>{BANNER.label}</em>
