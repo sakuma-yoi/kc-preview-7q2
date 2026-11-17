@@ -64,7 +64,9 @@ export function Change({ products, onDone }: GameProps) {
     const total = tray.length + change
     const extra = total - q.best.total
     setResult({ given: tray.length, change, total })
-    r.answer(Math.max(5, 20 - CHANGE_PENALTY * extra), extra === 0, 2800, undefined, extra === 0 ? 'up' : extra <= 1 ? 'keep' : 'miss')
+    // いちばん少ない枚数と同じなら◎、1枚多いと○、2枚で△、それ以上は✕
+    const grade = extra === 0 ? 'great' : extra === 1 ? 'good' : extra === 2 ? 'fair' : 'bad'
+    r.answer(Math.max(5, 20 - CHANGE_PENALTY * extra), grade, 2800)
   }
 
   return (
@@ -292,7 +294,7 @@ export function Value({ onDone }: GameProps) {
   const done = picked !== null || timeUp
 
   return (
-    <Stage r={r} question="どれがいちばんお得？ぱっと選んでください">
+    <Stage r={r} question="どれがいちばんお得？">
       <div className="timer" key={r.round}>
         <i style={{ animationDuration: `${q.timeMs}ms`, animationPlayState: done ? 'paused' : 'running' }} />
       </div>

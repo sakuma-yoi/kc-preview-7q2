@@ -204,11 +204,20 @@ export function Range({ products, onDone }: GameProps) {
     return { p, from, to, t1, ans, hint: lv.hint, choices: numberChoices(ans, lv.gaps, 10) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [r.round])
-  const [picked, setPicked] = useState<number | null>(null)
+  // 自分で時間を入れる。はじめはパッケージに書いてある時間
+  const [value, setValue] = useState(q.t1)
+  const [done, setDone] = useState(false)
   useEffect(() => {
-    setPicked(null)
+    setValue(q.t1)
+    setDone(false)
     r.see([q.p.id])
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
+  const add = (d: number) => {
+    if (done) return
+    sfx('tap')
+    setValue((v) => Math.min(30 * 60, Math.max(0, v + d)))
+  }
+  const ok = value === q.ans
 
   return (
     <Stage
@@ -231,25 +240,44 @@ export function Range({ products, onDone }: GameProps) {
         </div>
       </div>
       {q.hint && <p className="hint">W数が大きいほど、あたためる時間は短くなります</p>}
-      <div className="choices two">
-        {q.choices.map((c) => (
-          <button
-            key={c}
-            className={`tile num ${picked !== null && c === q.ans ? 'reveal' : ''} ${picked === c && c !== q.ans ? 'miss' : ''}`}
-            onClick={() => {
-              if (picked !== null) return
-              setPicked(c)
-              r.answer(c === q.ans ? 20 : 0, c === q.ans, c === q.ans ? 900 : 1800)
-            }}
-          >
-            {minSec(c)}
+      <div className={`timer-set ${done ? (ok ? 'right' : 'wrong') : ''}`}>
+        <div className="ts-col">
+          <button onClick={() => add(60)} aria-label="1分ふやす" disabled={done}>
+            ＋
           </button>
-        ))}
+          <p>
+            <b>{Math.floor(value / 60)}</b>分
+          </p>
+          <button onClick={() => add(-60)} aria-label="1分へらす" disabled={done}>
+            −
+          </button>
+        </div>
+        <div className="ts-col">
+          <button onClick={() => add(10)} aria-label="10秒ふやす" disabled={done}>
+            ＋
+          </button>
+          <p>
+            <b>{String(value % 60).padStart(2, '0')}</b>秒
+          </p>
+          <button onClick={() => add(-10)} aria-label="10秒へらす" disabled={done}>
+            −
+          </button>
+        </div>
       </div>
-      {picked !== null && (
+      {done ? (
         <p className="note center">
           {minSec(q.t1)} × {q.from} ÷ {q.to} ＝ <b>{minSec(q.ans)}</b>
         </p>
+      ) : (
+        <button
+          className="btn play"
+          onClick={() => {
+            setDone(true)
+            r.answer(ok ? 20 : 0, ok, ok ? 1000 : 2200)
+          }}
+        >
+          この時間であたためる
+        </button>
       )}
     </Stage>
   )

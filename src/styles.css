@@ -1501,10 +1501,14 @@ button:focus-visible {
   animation: thunk 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
   text-shadow: 0 0 0 #fff, 0 4px 18px rgba(255, 255, 255, 0.9);
 }
-.mark.ok {
+.mark.great,
+.mark.good {
   color: var(--red);
 }
-.mark.ng {
+.mark.fair {
+  color: #d98a00;
+}
+.mark.bad {
   color: var(--freeze-deep);
 }
 .hud {
@@ -2644,4 +2648,191 @@ a.btn {
   from {
     scale: 1.25;
   }
+}
+
+/* レンジ：時間を合わせる */
+.timer-set {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #1d2a22;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.timer-set.right {
+  outline: 4px solid var(--red);
+}
+.ts-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.ts-col p {
+  color: #8cf5a8;
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 18px;
+}
+.ts-col p b {
+  font-size: 46px;
+  font-variant-numeric: tabular-nums;
+}
+.ts-col button {
+  width: 88px;
+  height: 48px;
+  border-radius: 12px;
+  background: #e3e6e8;
+  font-size: 26px;
+  font-weight: 900;
+  box-shadow: 0 4px 0 #9aa3a8;
+}
+.ts-col button:active {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #9aa3a8;
+}
+.ts-col button:disabled {
+  opacity: 0.4;
+}
+
+/* 買い物リスト：売り場を上から見たところ */
+.floor {
+  position: relative;
+  padding: 12px 10px 10px;
+  border-radius: 16px;
+  background-color: #eef1ee;
+  background-image:
+    linear-gradient(rgba(23, 54, 74, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 54, 74, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+  box-shadow: inset 0 0 0 2px var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.floor-sign {
+  align-self: center;
+  padding: 2px 16px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+.cases {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 34px;
+  row-gap: 16px;
+}
+.case {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  text-align: center;
+}
+.case-sign {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  margin-bottom: -6px;
+  padding: 3px 12px;
+  border-radius: 8px;
+  background: var(--c);
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1.25;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+}
+.case-body {
+  display: block;
+  padding: 7px;
+  border-radius: 10px;
+  background: #f8fafb;
+  border: 3px solid var(--c);
+  box-shadow: 0 6px 0 rgba(23, 54, 74, 0.18);
+}
+.case-glass {
+  position: relative;
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-radius: 6px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #cfe9f6, #9fd0ea);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+.case.fridge .case-glass {
+  background: linear-gradient(180deg, #e3f3e6, #bfe2c6);
+}
+/* ガラスの反射 */
+.case-glass::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.55) 44%, transparent 52%);
+  pointer-events: none;
+}
+.case-item {
+  font-size: 30px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 1px rgba(23, 54, 74, 0.25));
+}
+.case em {
+  position: absolute;
+  z-index: 2;
+  bottom: -8px;
+  right: -6px;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 900;
+  background: var(--red);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+.case:active .case-body {
+  translate: 0 3px;
+  box-shadow: 0 3px 0 rgba(23, 54, 74, 0.18);
+}
+.checkout {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 5px 0 #a82a19;
+}
+.checkout:disabled {
+  background: #c9cfd2;
+  box-shadow: 0 5px 0 #9aa3a8;
+}
+.checkout strong {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.checkout small {
+  font-size: 14px;
+  font-weight: 700;
+}
+.checkout-belt {
+  width: 46px;
+  height: 26px;
+  border-radius: 5px;
+  background: repeating-linear-gradient(90deg, #333 0 6px, #555 6px 9px);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.shelf-head {
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
 }

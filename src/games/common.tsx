@@ -18,6 +18,10 @@ export type GameProps = {
 /** 速さの基準（秒）。fast 以内なら速さ満点、slow を超えると速さ0点 */
 export type Pace = { fast: number; slow: number }
 
+/** 判定の4段階：◎ great、○ good、△ fair、✕ bad */
+export type Grade = 'great' | 'good' | 'fair' | 'bad'
+export const GRADE_MARK: Record<Grade, string> = { great: '◎', good: '○', fair: '△', bad: '✕' }
+
 /** 次のレベルの決め方。up＝1つ上げる、keep＝そのまま、miss＝まちがい（続くと下がる） */
 export type Step = 'up' | 'keep' | 'miss'
 
@@ -30,7 +34,7 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
   const [level, setLevel] = useState(0)
   const levelRef = useRef(0)
   const misses = useRef(0)
-  const [mark, setMark] = useState<null | 'ok' | 'ng'>(null)
+  const [mark, setMark] = useState<null | Grade>(null)
   const roundRef = useRef(0)
   const accuracy = useRef(0)
   const speed = useRef(0)
@@ -58,19 +62,22 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
   }
 
   /**
-   * 1問の結果を受け取り、◯✕を出してから次へ進む。ids を渡すと、その商品だけを記録する
-   * step を省くと、正解ならレベルを上げ、不正解なら「まちがい」として数える
+   * 1問の結果を受け取り、◎○△✕を出してから次へ進む。ids を渡すと、その商品だけを記録する
+   * result は true（◎）、false（✕）、または4段階の判定
+   * step を省くと、◎ならレベルを上げ、○はそのまま、△✕は「まちがい」として数える
    */
-  const answer = (points: number, ok: boolean, delay = 900, ids?: string[], step?: Step) => {
+  const answer = (points: number, result: boolean | Grade, delay = 900, ids?: string[], step?: Step) => {
     if (busy.current) return
     busy.current = true
+    const grade: Grade = result === true ? 'great' : result === false ? 'bad' : result
+    const ok = grade !== 'bad'
     const t = (performance.now() - clock.current) / 1000
     const quick = Math.max(0, Math.min(1, 1 - (t - pace.fast) / (pace.slow - pace.fast)))
     accuracy.current += points * SCORE_ACCURACY
     speed.current += points * SCORE_SPEED * quick
     learned.current.push(...new Set(ids ?? (ok ? pending.current : [])))
-    setMark(ok ? 'ok' : 'ng')
-    sfx(ok ? 'ok' : 'ng')
+    setMark(grade)
+    sfx(grade === 'great' ? 'ok' : grade === 'bad' ? 'ng' : 'soft')
     window.setTimeout(() => {
       if (!alive.current) return
       busy.current = false
@@ -80,7 +87,7 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
         const acc = Math.min(score, Math.round(accuracy.current))
         onDone(score, learned.current, { accuracy: acc, speed: score - acc })
       } else {
-        const s = step ?? (ok ? 'up' : 'miss')
+        const s = step ?? (grade === 'great' ? 'up' : grade === 'good' ? 'keep' : 'miss')
         if (s === 'up') {
           levelRef.current = Math.min(levels - 1, levelRef.current + 1)
           misses.current = 0
@@ -133,7 +140,7 @@ export function Stage({ r, question, children }: StageProps) {
       {children}
       {r.mark && (
         <div className={`mark ${r.mark}`} role="status">
-          {r.mark === 'ok' ? '◯' : '✕'}
+          {GRADE_MARK[r.mark]}
         </div>
       )}
     </div>

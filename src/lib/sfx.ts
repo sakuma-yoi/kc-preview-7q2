@@ -20,7 +20,7 @@ function tone(freq: number, start: number, dur: number, type: OscillatorType = '
   o.stop(ctx.currentTime + start + dur)
 }
 
-export function sfx(name: 'ok' | 'ng' | 'tap' | 'stamp' | 'win' | 'scan' | 'coin') {
+export function sfx(name: 'ok' | 'ng' | 'tap' | 'stamp' | 'win' | 'scan' | 'coin' | 'soft') {
   if (!enabled) return
   try {
     ctx ??= new AudioContext()
@@ -32,6 +32,9 @@ export function sfx(name: 'ok' | 'ng' | 'tap' | 'stamp' | 'win' | 'scan' | 'coin
       tone(220, 0, 0.25, 'triangle', 0.16)
     } else if (name === 'tap') {
       tone(660, 0, 0.06, 'sine', 0.06)
+    } else if (name === 'soft') {
+      tone(660, 0, 0.12)
+      tone(880, 0.1, 0.14, 'sine', 0.08)
     } else if (name === 'scan') {
       tone(1760, 0, 0.08, 'square', 0.05)
     } else if (name === 'coin') {

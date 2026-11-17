@@ -322,34 +322,48 @@ function MemoRound({
   )
 
   if (view === 'map') {
+    // 売り場を上から見たところ：大きな冷凍庫が2列に並び、下にレジがある
     return (
       <>
-        <p className="hud">
-          <span>売り場をえらんでください</span>
-        </p>
-        <div className="aisles">
-          {SHELVES.map((sh) => {
-            const count = cart.filter((c) => c.shelf === sh.id).length
-            return (
-              <button key={sh.id} className="aisle" style={{ borderTopColor: sh.color }} onClick={() => setView(sh.id)} disabled={over}>
-                <span className="aisle-icon" style={{ color: sh.color }}>
-                  <GenericPack color={sh.color} />
-                </span>
-                <strong>{sh.name}</strong>
-                {count > 0 && <em>かごに{count}</em>}
-              </button>
-            )
-          })}
+        <div className="floor">
+          <p className="floor-sign">冷凍・チルド売り場</p>
+          <div className="cases">
+            {SHELVES.map((sh) => {
+              const count = cart.filter((c) => c.shelf === sh.id).length
+              return (
+                <button
+                  key={sh.id}
+                  className={`case ${sh.kind}`}
+                  style={{ '--c': sh.color } as React.CSSProperties}
+                  onClick={() => setView(sh.id)}
+                  disabled={over}
+                  aria-label={`${sh.name}の売り場`}
+                >
+                  <span className="case-sign">{sh.name}</span>
+                  <span className="case-body">
+                    <span className="case-glass">
+                      {[0, 1, 2].map((k) => (
+                        <span key={k} className="case-item">
+                          <PIcon id={sh.icon} />
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                  {count > 0 && <em>かごに{count}</em>}
+                </button>
+              )
+            })}
+          </div>
+          <button className="checkout" disabled={cart.length !== n || over} onClick={checkout}>
+            <span className="checkout-belt" aria-hidden="true" />
+            <strong>レジへ進む</strong>
+            <small>
+              かご {cart.length} / {n}
+            </small>
+          </button>
         </div>
         {cartBar}
-        <button className="btn play" disabled={cart.length !== n || over} onClick={checkout}>
-          レジへ進む
-        </button>
-        {over && (
-          <p className="note center">
-            メモ：{q.list.map((x) => x.name).join('、')}
-          </p>
-        )}
+        {over && <p className="note center">メモ：{q.list.map((x) => x.name).join('、')}</p>}
       </>
     )
   }
@@ -357,7 +371,7 @@ function MemoRound({
   const shelf = SHELVES.find((sh) => sh.id === view)!
   return (
     <>
-      <div className="shelf-head" style={{ background: shelf.color }}>
+      <div className={`shelf-head ${shelf.kind}`} style={{ background: shelf.color }}>
         <button onClick={() => setView('map')} aria-label="売り場の一覧にもどる">
           ‹ 売り場
         </button>
