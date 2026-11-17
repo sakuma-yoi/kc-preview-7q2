@@ -6,7 +6,7 @@ import { APP_VERSION } from '../data/config'
 import { allowedInGame, DEFAULT_GAME_PRODUCTS, GAMES, NEW_GAME_ORDER } from '../data/games'
 import { PRODUCTS } from '../data/products'
 import { jpDate } from '../lib/date'
-import { addStamps, initialState, productsFor, today, useStore } from '../store'
+import { addStamps, addTickets, initialState, productsFor, today, useStore } from '../store'
 
 function Toggle({ id, label, on, onChange }: { id: string; label: string; on: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -86,6 +86,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
         <div className="ops-row">
           <button onClick={() => update((s) => void (s.dayOffset -= 1))}>1日もどす</button>
           <button onClick={() => update((s) => void (s.dayOffset += 1))}>1日すすめる</button>
+          <button onClick={() => update((s) => void (s.dayOffset += 30))}>30日すすめる</button>
           <button onClick={() => update((s) => void (s.dayOffset = 0))}>今日にもどす</button>
         </div>
         <Toggle
@@ -96,7 +97,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
         />
         <div className="ops-row">
           <button onClick={() => update((s) => void addStamps(s, 5))}>スタンプ+5</button>
-          <button onClick={() => update((s) => void (s.tickets += 1))}>チケット+1</button>
+          <button onClick={() => update((s) => void addTickets(s, 1))}>チケット+1</button>
           <button
             onClick={() =>
               update((s) => {

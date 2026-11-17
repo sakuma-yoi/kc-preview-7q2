@@ -3,10 +3,11 @@ import { useEffect, useRef, useState } from 'react'
 import { TicketIcon } from '../components/Icons'
 import { Sheet } from '../components/Sheet'
 import { Thumb } from '../components/Pack'
-import { CARD_SIZE, COUPON_DAYS, COUPON_SOON_DAYS, couponApplies, COUPONS, type CouponDef } from '../data/config'
+import { CARD_SIZE, COUPON_DAYS, COUPON_SOON_DAYS, couponApplies, COUPONS, SEASON_MONTHS, seasonLabel, seasonOf, type CouponDef } from '../data/config'
 import { PRODUCTS } from '../data/products'
 import { sfx } from '../lib/sfx'
-import { daysLeft, exchange, useStore, type OwnedCoupon } from '../store'
+import { mdLabel } from '../lib/date'
+import { daysLeft, exchange, ticketExpiries, today, useStore, type OwnedCoupon } from '../store'
 
 const defOf = (c: OwnedCoupon) => COUPONS.find((d) => d.id === c.couponId)!
 const jp = (key: string) => {
@@ -87,6 +88,18 @@ export function Coupon({ onProduct }: { onProduct: (id: string) => void }) {
           <i style={{ width: `${(state.stamps / CARD_SIZE) * 100}%` }} />
         </div>
         <p className="wallet-next">あと{CARD_SIZE - state.stamps}スタンプで次の1枚</p>
+        {ticketExpiries(state).length > 0 && (
+          <ul className="ticket-expiry">
+            {ticketExpiries(state).map((x) => (
+              <li key={x.until.getTime()} className={x.warn ? 'warn' : ''}>
+                <b>{x.n}枚</b>：{mdLabel(x.until)}まで{x.warn && `（あと${x.daysLeft}日）`}
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="wallet-rule">
+          いまは{seasonLabel(seasonOf(today(state)))}のシーズンです。チケットは、もらったシーズン（{SEASON_MONTHS}か月ごと）と、その次のシーズンの終わりまで使えます。スタンプは期限なしで持ちこせます。
+        </p>
       </section>
 
       <div className="seg" role="tablist">
@@ -170,6 +183,8 @@ export function Coupon({ onProduct }: { onProduct: (id: string) => void }) {
             チケット<b>{confirm.cost}</b>枚を使って「{confirm.name}」と交換します。
             <br />
             のこり {state.tickets}枚 → <b>{state.tickets - confirm.cost}</b>枚
+            <br />
+            <small>期限の近いチケットから使います</small>
           </p>
           <Targets def={confirm} onProduct={onProduct} />
           <button className="btn play" onClick={doExchange}>

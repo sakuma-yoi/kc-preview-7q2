@@ -56,6 +56,31 @@ export const COUPON_DAYS = 30
 /** 「まもなく期限」と表示する残り日数 */
 export const COUPON_SOON_DAYS = 7
 
+/**
+ * 交換チケットのシーズン：3か月ごとに区切る（SEASON_FIRST_MONTH 月から始まる3か月が1シーズン）
+ * あるシーズンにもらったチケットは、次のシーズンの終わりまで使える。それをすぎると消える
+ */
+export const SEASON_MONTHS = 3
+export const SEASON_FIRST_MONTH = 1
+/** 期限の何日前から「まもなく期限」と知らせるか */
+export const TICKET_WARN_DAYS = 30
+
+/** その日のシーズン番号 */
+export const seasonOf = (d: Date) => Math.floor((d.getFullYear() * 12 + d.getMonth() - (SEASON_FIRST_MONTH - 1)) / SEASON_MONTHS)
+/** シーズンの最初の日 */
+export const seasonStart = (n: number) => {
+  const m = n * SEASON_MONTHS + SEASON_FIRST_MONTH - 1
+  return new Date(Math.floor(m / 12), m % 12, 1)
+}
+/** シーズンの最後の日 */
+export const seasonEnd = (n: number) => {
+  const d = seasonStart(n + 1)
+  d.setDate(d.getDate() - 1)
+  return d
+}
+/** 「10〜12月」のような呼び方 */
+export const seasonLabel = (n: number) => `${seasonStart(n).getMonth() + 1}〜${seasonEnd(n).getMonth() + 1}月`
+
 /** ホームのおすすめ商品バナー */
 export const BANNER = catalog.banner
 
@@ -82,4 +107,4 @@ export const ODDONE_LATE: 'color' | 'flip' = 'color'
 /** 冷凍庫脳年齢：100点で20歳、0点で55歳 */
 export const brainAge = (score: number) => Math.round(20 + (100 - score) * 0.35)
 
-export const APP_VERSION = '1.11.1'
+export const APP_VERSION = '1.12.0'

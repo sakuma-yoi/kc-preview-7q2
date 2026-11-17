@@ -10,6 +10,9 @@ import {
   MONTH_BONUS_TICKETS,
   NEW_GAME_EVERY,
   PURCHASE_STAMPS_PER_WEEK,
+  seasonEnd,
+  seasonOf,
+  TICKET_WARN_DAYS,
   WEEK_BONUS_STAMPS,
   brainAge,
   starsOf,
@@ -26,7 +29,12 @@ export type OwnedCoupon = { uid: string; couponId: string; issued: string; expir
 
 export type State = {
   v: 1
+  /** 交換チケットの合計（ticketSeasons の合計と同じ） */
   tickets: number
+  /** もらったシーズンごとの交換チケットの枚数（シーズン番号 → 枚数）。期限の近いものから使う */
+  ticketSeasons: Record<string, number>
+  /** シーズンが終わって消えたチケット（ホームで1回知らせる） */
+  ticketsExpired: { n: number; until: string } | null
   /** いまのスタンプカードに押してある数 */
   stamps: number
   /** 今日の脳トレをクリアした日 */
@@ -63,6 +71,8 @@ const KEY = 'reitoko-noutore-v1'
 export const initialState = (): State => ({
   v: 1,
   tickets: 0,
+  ticketSeasons: {},
+  ticketsExpired: null,
   stamps: 0,
   clearedDays: [],
   owned: GAMES.filter((g) => g.free).map((g) => g.id),
@@ -92,6 +102,12 @@ export function load(): State {
         const merged: State = { ...initialState(), ...s }
         // 以前の版のデータ：見つけた商品は「1回出会った」として引き継ぐ
         for (const id of Object.keys(merged.seen)) if (merged.seen[id].length > 0) merged.met[id] ??= 1
+        // 以前の版のデータ：シーズン分けのないチケットは、今のシーズンにもらったことにする
+        const counted = Object.values(merged.ticketSeasons).reduce((a, b) => a + b, 0)
+        if (merged.tickets > counted) {
+          const now = String(seasonOf(today(merged)))
+          merged.ticketSeasons[now] = (merged.ticketSeasons[now] ?? 0) + merged.tickets - counted
+        }
         return merged
       }
     }
@@ -124,8 +140,53 @@ export function daysToNewGame(s: State): number | null {
   return Math.max(0, need - s.clearedDays.length)
 }
 
+/** 交換チケットをもらう（今のシーズンの分として持つ） */
+export function addTickets(s: State, n: number) {
+  const now = String(seasonOf(today(s)))
+  s.ticketSeasons[now] = (s.ticketSeasons[now] ?? 0) + n
+  s.tickets += n
+}
+
+/** 交換チケットを使う。期限の近いもの（前のシーズンの分）から使う */
+function spendTickets(s: State, n: number) {
+  let left = n
+  for (const k of Object.keys(s.ticketSeasons).sort((a, b) => Number(a) - Number(b))) {
+    const use = Math.min(left, s.ticketSeasons[k])
+    s.ticketSeasons[k] -= use
+    left -= use
+    if (s.ticketSeasons[k] === 0) delete s.ticketSeasons[k]
+  }
+  s.tickets -= n
+}
+
+/** 期限（もらった次のシーズンの終わり）をすぎたチケットを消す */
+export function expireTickets(s: State) {
+  const now = seasonOf(today(s))
+  for (const k of Object.keys(s.ticketSeasons)) {
+    if (Number(k) + 1 >= now) continue
+    const n = s.ticketSeasons[k]
+    delete s.ticketSeasons[k]
+    s.tickets -= n
+    if (n > 0) s.ticketsExpired = { n: (s.ticketsExpired?.n ?? 0) + n, until: dateKey(seasonEnd(Number(k) + 1)) }
+  }
+}
+
+/** 持っているチケットの期限の一覧（期限の近い順）。warn＝まもなく期限 */
+export function ticketExpiries(s: State) {
+  const d = today(s)
+  return Object.entries(s.ticketSeasons)
+    .filter(([, n]) => n > 0)
+    .map(([k, n]) => {
+      const until = seasonEnd(Number(k) + 1)
+      const daysLeft = Math.round((until.getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86400000)
+      return { n, until, daysLeft, warn: daysLeft <= TICKET_WARN_DAYS }
+    })
+    .sort((a, b) => a.until.getTime() - b.until.getTime())
+}
+
 /** 今日の脳トレを決める（1日1回）。新しい脳トレは、クリアするまで出続ける */
 export function ensureDaily(s: State) {
+  expireTickets(s)
   const key = todayKey(s)
   if (s.daily?.date === key) return
   const locked = NEW_GAME_ORDER.filter((id) => !s.owned.includes(id))
@@ -155,7 +216,7 @@ export function addStamps(s: State, n: number): number {
   let got = 0
   while (s.stamps >= CARD_SIZE) {
     s.stamps -= CARD_SIZE
-    s.tickets += 1
+    addTickets(s, 1)
     got += 1
   }
   return got
@@ -213,7 +274,7 @@ export function claimDaily(s: State, prize: Prize): { rewards: Reward[]; stampsA
     stamps += prize.amount
     rewards.push({ kind: 'stamp', text: `くじ：スタンプ ${prize.amount}個` })
   } else {
-    s.tickets += prize.amount
+    addTickets(s, prize.amount)
     rewards.push({ kind: 'ticket', text: `くじ：交換チケット ${prize.amount}枚` })
   }
   if (first) {
@@ -229,7 +290,7 @@ export function claimDaily(s: State, prize: Prize): { rewards: Reward[]; stampsA
   const month = key.slice(0, 7)
   if (!s.monthBonus.includes(month) && s.clearedDays.filter((k) => k.startsWith(month)).length === daysInMonth(d)) {
     s.monthBonus.push(month)
-    s.tickets += MONTH_BONUS_TICKETS
+    addTickets(s, MONTH_BONUS_TICKETS)
     rewards.push({ kind: 'ticket', text: `1か月毎日ボーナス：交換チケット ${MONTH_BONUS_TICKETS}枚` })
   }
   const full = addStamps(s, stamps)
@@ -261,7 +322,7 @@ export function purchase(s: State, productId: string) {
 /** 交換チケットをクーポンに換える */
 export function exchange(s: State, def: CouponDef) {
   if (s.tickets < def.cost) return false
-  s.tickets -= def.cost
+  spendTickets(s, def.cost)
   const d = today(s)
   const code = String(Math.floor(1e11 + Math.random() * 9e11))
   s.coupons.push({

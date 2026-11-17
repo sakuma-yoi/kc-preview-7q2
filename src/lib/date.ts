@@ -20,3 +20,12 @@ export const WEEK_LABELS = ['月', '火', '水', '木', '金', '土', '日']
 
 export const jpDate = (d: Date) =>
   `${d.getMonth() + 1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`
+
+/** 3月31日 のような書き方 */
+export const mdLabel = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日`
+
+/** dateKey の文字（2026-03-31）を日付にもどす */
+export const fromKey = (k: string) => {
+  const [y, m, d] = k.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}

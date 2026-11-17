@@ -7,9 +7,9 @@ import { Sheet } from '../components/Sheet'
 import { BANNER, CARD_SIZE, MONTH_BONUS_TICKETS, WEEK_BONUS_STAMPS } from '../data/config'
 import { gameById } from '../data/games'
 import { PRODUCTS, productById, purchaseStamps } from '../data/products'
-import { dateKey, daysInMonth, jpDate, WEEK_LABELS, weekDays } from '../lib/date'
+import { dateKey, daysInMonth, fromKey, jpDate, mdLabel, WEEK_LABELS, weekDays } from '../lib/date'
 import { sfx } from '../lib/sfx'
-import { clearedToday, purchase, purchaseLeft, today, todayKey, useStore } from '../store'
+import { clearedToday, purchase, purchaseLeft, ticketExpiries, today, todayKey, useStore } from '../store'
 
 const TILT = [-8, 5, -3, 9, -6, 4, -10, 7, -4, 0]
 
@@ -19,9 +19,10 @@ type Props = {
   onFresh: (n: number) => void
   onPlay: (gameId: string, daily: boolean) => void
   onProduct: (id: string) => void
+  onCoupon: () => void
 }
 
-export function Home({ fresh, onFresh, onPlay, onProduct }: Props) {
+export function Home({ fresh, onFresh, onPlay, onProduct, onCoupon }: Props) {
   const { state, update, toast } = useStore()
   const [buying, setBuying] = useState(false)
 
@@ -44,6 +45,7 @@ export function Home({ fresh, onFresh, onPlay, onProduct }: Props) {
   const monthTotal = daysInMonth(now)
   const monthMissed = now.getDate() - 1 - (monthCleared - (cleared ? 1 : 0)) > 0
   const left = purchaseLeft(state)
+  const expiring = ticketExpiries(state).find((x) => x.warn)
 
   const buy = (id: string) => {
     const got = update((s) => purchase(s, id))
@@ -60,6 +62,26 @@ export function Home({ fresh, onFresh, onPlay, onProduct }: Props) {
         {jpDate(now)}
         <span>{cleared ? BRAND.doneGreeting : BRAND.greeting}</span>
       </p>
+
+      {/* 交換チケットの期限 */}
+      {state.ticketsExpired && (
+        <div className="ticket-alert gone" role="status">
+          <p>
+            <TicketIcon size={20} />
+            交換チケット <b>{state.ticketsExpired.n}枚</b>の期限（{mdLabel(fromKey(state.ticketsExpired.until))}）が切れました
+          </p>
+          <button onClick={() => update((s) => void (s.ticketsExpired = null))}>とじる</button>
+        </div>
+      )}
+      {expiring && (
+        <button className="ticket-alert" onClick={onCoupon}>
+          <p>
+            <TicketIcon size={20} />
+            交換チケット <b>{expiring.n}枚</b>の期限は <b>{mdLabel(expiring.until)}</b>（あと{expiring.daysLeft}日）。クーポンに交換しましょう
+          </p>
+          <span aria-hidden="true">›</span>
+        </button>
+      )}
 
       {/* 今日の脳トレ：冷凍庫のとびら */}
       <section className="door" aria-label="今日の脳トレ">

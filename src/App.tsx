@@ -9,7 +9,7 @@ import { Home } from './screens/Home'
 import { Play } from './screens/Play'
 import { Settings } from './screens/Settings'
 import { Zukan } from './screens/Zukan'
-import { ensureDaily, load, save, StoreContext, type State, type Store } from './store'
+import { ensureDaily, load, save, StoreContext, ticketExpiries, type State, type Store } from './store'
 
 type Tab = 'home' | 'games' | 'zukan' | 'coupon'
 
@@ -130,7 +130,11 @@ export default function App() {
                 {BRAND.logoHead}
                 <span>{BRAND.logoTail}</span>
               </h1>
-              <button className="ticket-chip" onClick={() => go('coupon')} aria-label={`交換チケット ${state.tickets}枚`}>
+              <button
+                className={`ticket-chip ${ticketExpiries(state).some((x) => x.warn) ? 'warn' : ''}`}
+                onClick={() => go('coupon')}
+                aria-label={`交換チケット ${state.tickets}枚${ticketExpiries(state).some((x) => x.warn) ? '（まもなく期限のチケットがあります）' : ''}`}
+              >
                 <TicketIcon size={20} />
                 <b>{state.tickets}</b>
                 <small>枚</small>
@@ -142,7 +146,13 @@ export default function App() {
 
             <main className="screen">
               {tab === 'home' && (
-                <Home fresh={fresh} onFresh={setFresh} onPlay={(gameId, daily) => setPlay({ gameId, daily })} onProduct={setProduct} />
+                <Home
+                  fresh={fresh}
+                  onFresh={setFresh}
+                  onPlay={(gameId, daily) => setPlay({ gameId, daily })}
+                  onProduct={setProduct}
+                  onCoupon={() => go('coupon')}
+                />
               )}
               {tab === 'games' && <Games onPlay={(gameId, daily) => setPlay({ gameId, daily })} onHome={() => go('home')} />}
               {tab === 'zukan' && <Zukan onProduct={setProduct} />}

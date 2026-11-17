@@ -48,7 +48,7 @@ SINGLE=1 npx vite build --outDir dist-single   # 確認用の1ファイル版（
 | 商品・バナー・特集・棚・損得勘定の商品 | `src/catalog/`（型は `src/data/types.ts`） |
 | 脳トレの設定・登場商品・届く順番 | `src/data/games.ts` |
 | 脳トレの難しさ（レベルごとの量・時間・選択肢）と速さの基準 | `src/data/levels.ts` |
-| 報酬の数値、くじ、クーポン、特集、★、点数の割合 | `src/data/config.ts` |
+| 報酬の数値、くじ、クーポン、交換チケットのシーズンと期限、★、点数の割合 | `src/data/config.ts` |
 | 報酬のルールとデータの保存 | `src/store.ts` |
 | 新しい脳トレ | `src/games/` に作り、`src/games/index.ts` と `src/data/games.ts` に登録 |
 
