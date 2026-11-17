@@ -1,4 +1,4 @@
-// 盤面を操作する脳トレ：間違い探し・商品神経衰弱・買い物リスト暗記・商品名の並べ替え
+// 盤面を操作する脳トレ：間違い探し・商品神経衰弱・買い物リスト暗記・商品名シャッフル
 
 import { useEffect, useMemo, useState } from 'react'
 import { GenericPack, PIcon } from '../components/PIcon'
@@ -412,7 +412,7 @@ export function Memo({ products, onDone }: GameProps) {
   )
 }
 
-/* ---------- 商品名の並べ替え ---------- */
+/* ---------- 商品名シャッフル ---------- */
 
 function AnagramRound({ product, onEnd }: { product: Product; onEnd: (points: number, ok: boolean) => void }) {
   const chars = useMemo(() => {

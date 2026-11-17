@@ -1,16 +1,42 @@
-// 4択で答える脳トレ：冷凍庫の中身記憶・お会計チャレンジ・レンジ時間の計算・仲間はずれ探し
+// 4択で答える脳トレ：お弁当の具材記憶・お会計チャレンジ・レンジ時間の計算・仲間はずれ探し
 
 import { useEffect, useMemo, useState } from 'react'
 import { PIcon } from '../components/PIcon'
 import { ODDONE_LATE } from '../data/config'
-import { shortName } from '../data/products'
+import { shortName, type Product } from '../data/products'
 import { sfx } from '../lib/sfx'
 import { minSec, randInt, sample, shuffle, yen } from '../lib/util'
 import { FREEZER, ODDONE, PACE, RANGE, REGISTER, REGISTER_SCAN_MS } from '../data/levels'
 import { numberChoices, Stage, useRounds, type GameProps } from './common'
 
-/** 冷凍庫の中身記憶 */
-export function Freezer({ products, onDone }: GameProps) {
+/** お弁当の箱：左にごはん、右に仕切られたおかず。closed でふたが閉まる */
+function BentoBox({ items, closed }: { items: Product[]; closed: boolean }) {
+  return (
+    <div className={`bento ${closed ? 'closed' : ''}`}>
+      <div className="bento-box">
+        <div className="bento-rice" aria-hidden="true">
+          <span className="ume" />
+        </div>
+        <div className={`bento-sides n${items.length}`}>
+          {items.map((p) => (
+            <div key={p.id} className="bento-cell">
+              <span>
+                <PIcon id={p.id} />
+              </span>
+              <small>{shortName(p)}</small>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="bento-lid" aria-hidden="true">
+        <span className="lid-band" />
+      </div>
+    </div>
+  )
+}
+
+/** お弁当の具材記憶（id は以前の「冷凍庫の中身記憶」のまま） */
+export function Bento({ products, onDone }: GameProps) {
   const r = useRounds(5, onDone, PACE.freezer, FREEZER.length)
   const q = useMemo(() => {
     const lv = FREEZER[r.level]
@@ -20,7 +46,7 @@ export function Freezer({ products, onDone }: GameProps) {
     const askInside = !lv.askOutside || Math.random() < 0.5
     const correct = askInside ? inside[0] : outside[0]
     const others = askInside ? outside.slice(0, lv.choices - 1) : inside.slice(0, lv.choices - 1)
-    return { inside, askInside, correct, lookMs: lv.lookSec * 1000, choices: shuffle([correct, ...others]) }
+    return { inside: shuffle(inside), askInside, correct, lookMs: lv.lookSec * 1000, choices: shuffle([correct, ...others]) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [r.round])
   const [open, setOpen] = useState(true)
@@ -43,54 +69,43 @@ export function Freezer({ products, onDone }: GameProps) {
       r={r}
       question={
         open ? (
-          '冷凍庫の中身を覚えてください'
+          'お弁当の中身を覚えてください'
         ) : q.askInside ? (
           <>
-            冷凍庫に<b>入っていた</b>のはどれ？
+            お弁当に<b>入っていた</b>のはどれ？
           </>
         ) : (
           <>
-            冷凍庫に<b>入っていなかった</b>のはどれ？
+            お弁当に<b>入っていなかった</b>のはどれ？
           </>
         )
       }
     >
-      {open ? (
-        <div className="fz">
-          <div className="timer" key={r.round}>
-            <i style={{ animationDuration: `${q.lookMs}ms` }} />
-          </div>
-          <ul className={`fz-items n${q.inside.length}`}>
-            {q.inside.map((p) => (
-              <li key={p.id}>
-                <span><PIcon id={p.id} /></span>
-                {shortName(p)}
-              </li>
-            ))}
-          </ul>
+      {open && (
+        <div className="timer" key={r.round}>
+          <i style={{ animationDuration: `${q.lookMs}ms` }} />
         </div>
-      ) : (
-        <>
-          <div className="fz closed" aria-hidden="true">
-            <span className="fz-handle" />
-          </div>
-          <div className="choices two">
-            {q.choices.map((p) => (
-              <button
-                key={p.id}
-                className={`tile ${picked && p === q.correct ? 'reveal' : ''} ${picked === p.id && p !== q.correct ? 'miss' : ''}`}
-                onClick={() => {
-                  if (picked) return
-                  setPicked(p.id)
-                  r.answer(p === q.correct ? 20 : 0, p === q.correct, p === q.correct ? 900 : 1700)
-                }}
-              >
-                <span><PIcon id={p.id} /></span>
-                {shortName(p)}
-              </button>
-            ))}
-          </div>
-        </>
+      )}
+      <BentoBox items={q.inside} closed={!open} />
+      {!open && (
+        <div className="choices two">
+          {q.choices.map((p) => (
+            <button
+              key={p.id}
+              className={`tile ${picked && p === q.correct ? 'reveal' : ''} ${picked === p.id && p !== q.correct ? 'miss' : ''}`}
+              onClick={() => {
+                if (picked) return
+                setPicked(p.id)
+                r.answer(p === q.correct ? 20 : 0, p === q.correct, p === q.correct ? 900 : 1700)
+              }}
+            >
+              <span>
+                <PIcon id={p.id} />
+              </span>
+              {shortName(p)}
+            </button>
+          ))}
+        </div>
       )}
     </Stage>
   )
@@ -204,11 +219,11 @@ export function Range({ products, onDone }: GameProps) {
     return { p, from, to, t1, ans, hint: lv.hint, choices: numberChoices(ans, lv.gaps, 10) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [r.round])
-  // 自分で時間を入れる。はじめはパッケージに書いてある時間
-  const [value, setValue] = useState(q.t1)
+  // 自分で時間を入れる。0分0秒から
+  const [value, setValue] = useState(0)
   const [done, setDone] = useState(false)
   useEffect(() => {
-    setValue(q.t1)
+    setValue(0)
     setDone(false)
     r.see([q.p.id])
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps

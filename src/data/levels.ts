@@ -24,7 +24,7 @@ export const PACE = {
   anagram: { fast: 4, slow: 16 },
 }
 
-/** 冷凍庫の中身記憶。items＝冷凍庫の商品数、lookSec＝見られる秒数、choices＝選択肢の数、askOutside＝「入っていなかったのは？」も出すか */
+/** お弁当の具材記憶。items＝お弁当のおかずの数、lookSec＝見られる秒数、choices＝選択肢の数、askOutside＝「入っていなかったのは？」も出すか */
 export const FREEZER = [
   { items: 3, lookSec: 5, choices: 3, askOutside: false },
   { items: 3, lookSec: 4, choices: 4, askOutside: false },
