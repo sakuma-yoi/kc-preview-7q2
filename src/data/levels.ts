@@ -65,14 +65,32 @@ export const RANGE = [
  * 仲間はずれ探し。cells＝並ぶ数、cols＝横の数
  * subtle＝false なら違う商品、true なら同じ商品で色だけ違う（config.ts の ODDONE_LATE が 'flip' ならさかさま）
  * hue＝色の違いの大きさ（度）。大きいほど見つけやすい
+ * similar＝見た目の似た商品どうしを組み合わせる（ODDONE_LOOKALIKE）
+ * jitter＝全部の絵を少しずつ傾けたり大きさを変えたりして、本当の違いを目立たなくする
  */
 export const ODDONE = [
-  { cells: 9, cols: 3, subtle: false, hue: 0 },
-  { cells: 12, cols: 4, subtle: false, hue: 0 },
-  { cells: 16, cols: 4, subtle: false, hue: 0 },
-  { cells: 9, cols: 3, subtle: true, hue: 100 },
-  { cells: 16, cols: 4, subtle: true, hue: 60 },
+  { cells: 9, cols: 3, subtle: false, hue: 0, similar: false, jitter: false },
+  { cells: 12, cols: 4, subtle: false, hue: 0, similar: false, jitter: false },
+  { cells: 16, cols: 4, subtle: false, hue: 0, similar: false, jitter: false },
+  { cells: 12, cols: 4, subtle: false, hue: 0, similar: true, jitter: false },
+  { cells: 9, cols: 3, subtle: true, hue: 100, similar: false, jitter: false },
+  { cells: 16, cols: 4, subtle: false, hue: 0, similar: true, jitter: true },
+  { cells: 16, cols: 4, subtle: true, hue: 60, similar: false, jitter: false },
+  { cells: 20, cols: 4, subtle: true, hue: 60, similar: false, jitter: true },
 ]
+/** 見た目の似た商品の組み合わせ（仲間はずれ探しで使う）。商品を差し替えたら合わせて直す */
+export const ODDONE_LOOKALIKE: [string, string][] = [
+  ['karaage', 'takoyaki'],
+  ['pizza', 'onigiri'],
+  ['pasta', 'chahan'],
+  ['curry', 'hamburg'],
+  ['ice', 'potesala'],
+  ['ebifry', 'potato'],
+  ['gyoza', 'onigiri'],
+  ['chahan', 'potesala'],
+]
+/** バラつきの大きさ：傾き（度）と大きさ（倍） */
+export const ODDONE_JITTER = { rotate: 14, scale: [0.82, 1.12] }
 
 /** 間違い探し。cells＝絵の中の数、cols＝横の数、diffs＝違いの数、flip＝違いの1つを「さかさま」にするか */
 export const DIFF = [

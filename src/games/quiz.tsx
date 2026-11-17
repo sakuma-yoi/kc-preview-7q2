@@ -6,7 +6,7 @@ import { ODDONE_LATE } from '../data/config'
 import { shortName, type Product } from '../data/products'
 import { sfx } from '../lib/sfx'
 import { minSec, randInt, sample, shuffle, yen } from '../lib/util'
-import { FREEZER, ODDONE, PACE, RANGE, REGISTER, REGISTER_SCAN_MS } from '../data/levels'
+import { FREEZER, ODDONE, ODDONE_JITTER, ODDONE_LOOKALIKE, PACE, RANGE, REGISTER, REGISTER_SCAN_MS } from '../data/levels'
 import { numberChoices, Stage, useRounds, type GameProps } from './common'
 
 /** お弁当の箱：左にごはん、右に仕切られたおかず。closed でふたが閉まる */
@@ -300,11 +300,25 @@ export function Range({ products, onDone }: GameProps) {
 
 /** 仲間はずれ探し */
 export function OddOne({ products, onDone }: GameProps) {
-  const r = useRounds(5, onDone, PACE.oddone, ODDONE.length)
+  // 1問が短いので8問。全問正解で、いちばん上のレベルまで届く
+  const r = useRounds(8, onDone, PACE.oddone, ODDONE.length)
   const q = useMemo(() => {
     const lv = ODDONE[r.level]
-    const [a, b] = sample(products, 2)
-    return { a, b, colorOnly: lv.subtle, hue: lv.hue, cells: lv.cells, cols: lv.cols, odd: randInt(lv.cells) }
+    let [a, b] = sample(products, 2)
+    if (lv.similar) {
+      // 見た目の似た組み合わせから選ぶ（どちらが仲間はずれになるかはランダム）
+      const pairs = ODDONE_LOOKALIKE.filter(([x, y]) => products.some((p) => p.id === x) && products.some((p) => p.id === y))
+      if (pairs.length) {
+        const pair = shuffle(pairs[randInt(pairs.length)])
+        a = products.find((p) => p.id === pair[0])!
+        b = products.find((p) => p.id === pair[1])!
+      }
+    }
+    const [lo, hi] = ODDONE_JITTER.scale
+    const jitter = Array.from({ length: lv.cells }, () =>
+      lv.jitter ? { rotate: (Math.random() * 2 - 1) * ODDONE_JITTER.rotate, scale: lo + Math.random() * (hi - lo) } : { rotate: 0, scale: 1 },
+    )
+    return { a, b, colorOnly: lv.subtle, hue: lv.hue, cells: lv.cells, cols: lv.cols, odd: randInt(lv.cells), jitter }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [r.round])
   useEffect(() => r.see(q.colorOnly ? [q.a.id] : [q.a.id, q.b.id]), [q]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -337,7 +351,7 @@ export function OddOne({ products, onDone }: GameProps) {
                 if (odd) {
                   setOver(true)
                   // 2回目で正解したときは、レベルはそのまま
-                  r.answer(wrong.length > 0 ? 10 : 20, true, 900, undefined, wrong.length > 0 ? 'keep' : 'up')
+                  r.answer(wrong.length > 0 ? 6.25 : 12.5, wrong.length > 0 ? 'good' : true, 900, undefined, wrong.length > 0 ? 'keep' : 'up')
                 } else if (wrong.length > 0) {
                   setWrong([...wrong, i])
                   setOver(true)
@@ -349,13 +363,11 @@ export function OddOne({ products, onDone }: GameProps) {
               }}
             >
               <span
-                style={
-                  odd && q.colorOnly
-                    ? ODDONE_LATE === 'color'
-                      ? { filter: `hue-rotate(${q.hue}deg) saturate(1.3)` }
-                      : { rotate: '180deg' }
-                    : undefined
-                }
+                style={{
+                  filter: odd && q.colorOnly && ODDONE_LATE === 'color' ? `hue-rotate(${q.hue}deg) saturate(1.3)` : undefined,
+                  rotate: `${q.jitter[i].rotate + (odd && q.colorOnly && ODDONE_LATE === 'flip' ? 180 : 0)}deg`,
+                  scale: `${q.jitter[i].scale}`,
+                }}
               >
                 <PIcon id={odd && !q.colorOnly ? q.b.id : q.a.id} />
               </span>

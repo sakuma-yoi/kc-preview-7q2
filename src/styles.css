@@ -2949,3 +2949,19 @@ a.btn {
 .bento-sides.n5 .bento-cell span {
   font-size: 44px;
 }
+/* 問題数が多いときも、問題番号とレベルを1行に収める */
+.stage-top {
+  gap: 10px;
+}
+.q-no {
+  white-space: nowrap;
+}
+.q-dots {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+.q-dots i {
+  flex: 0 1 22px;
+  min-width: 6px;
+}

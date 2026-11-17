@@ -27,7 +27,7 @@ export const GAMES: Game[] = [
   { id: 'pairs', name: '商品神経衰弱', category: '記憶', summary: '商品のペアをそろえる', rule: '最初の数秒、ペアの片方だけが表になります。覚えたら、カードを2枚ずつめくって同じ商品のペアをそろえてください。少ない回数でそろえるほど高得点で、次はカードが増えます。', questions: 3, minutes: 2, icon: '🃏', minProducts: 6 },
   { id: 'memo', name: '買い物リスト暗記', category: '記憶', summary: 'メモを覚えて、売り場から探す', rule: '買い物メモを数秒で覚えます。メモが消えたら、冷凍・チルドの売り場をまわって、メモの商品を全部かごに入れてください。正解が続くと、メモの品数が増えます。', questions: 4, minutes: 2, icon: '📝', minProducts: 9 },
   { id: 'range', name: 'レンジ時間の計算', category: '計算', summary: 'W数がちがうときの温め時間を答える', rule: 'パッケージには「500Wで3分」のように書いてあります。家のレンジのW数だと何分何秒になるか、＋−ボタンで時間を合わせてください（秒は10秒ずつ）。', questions: 5, minutes: 1, icon: '⏲️', minProducts: 4 },
-  { id: 'oddone', name: '仲間はずれ探し', category: '観察', summary: '1つだけ違う商品を探す', rule: '並んだ商品の中から、1つだけ違うものを見つけてください。2回まで押せます。正解が続くと数が増え、少しだけ違うものを探す問題になります。', questions: 5, minutes: 1, icon: '👀', minProducts: 4 },
+  { id: 'oddone', name: '仲間はずれ探し', category: '観察', summary: '1つだけ違う商品を探す', rule: '並んだ商品の中から、1つだけ違うものを見つけてください。2回まで押せます。正解が続くと数が増え、似た商品や、少しだけ違うものを探す問題になります。', questions: 8, minutes: 1, icon: '👀', minProducts: 4 },
   { id: 'change', name: 'お釣りマスター', category: '計算', summary: 'お釣りの枚数が少なくなるように払う', rule: 'レジの金額を見て、お金をタップして払います。出す枚数とお釣りの枚数が、合わせていちばん少なければ満点です。どのお金も何枚でも出せます。', questions: 5, minutes: 2, icon: '💴', minProducts: 4 },
   { id: 'discount', name: '割引計算', category: '計算', summary: '割引シールのあとのお値段を答える', rule: '値札と割引シール（半額・〇円引・〇%OFF・〇割引）を見て、割引のあとのお値段を4つの中から選んでください。正解が続くと、シールが2枚になることもあります。', questions: 5, minutes: 1, icon: '🏷️', minProducts: 4 },
   { id: 'value', name: '損得勘定', category: '計算', summary: '大きさと値段から、お得なほうを選ぶ', rule: '大きさと値段のちがう商品をくらべて、いちばんお得なものを、時間内にぱっと選んでください。答えたあとに100gあたりの値段が出ます。', questions: 5, minutes: 1, icon: '⚖️', minProducts: 1 },
