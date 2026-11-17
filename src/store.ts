@@ -143,7 +143,8 @@ export function ensureDaily(s: State) {
 
 /** そのゲームに登場する商品 */
 export function productsFor(s: State, gameId: string): Product[] {
-  const custom = s.gameProducts[gameId]
+  // 商品を差し替えたあとに残っている、もうない商品の id は数えない
+  const custom = s.gameProducts[gameId]?.filter((id) => PRODUCTS.some((p) => p.id === id))
   const ids = custom && custom.length >= gameById(gameId).minProducts ? custom : DEFAULT_GAME_PRODUCTS[gameId]
   return PRODUCTS.filter((p) => ids.includes(p.id))
 }

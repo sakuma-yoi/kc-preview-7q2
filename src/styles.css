@@ -3092,3 +3092,22 @@ img.picon.photo {
   width: 1.8em;
   height: 1.8em;
 }
+
+/* 図鑑：大きさ違いの印 */
+.zukan-item .size-tag {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 9px;
+  background: var(--frost);
+  color: var(--ink);
+}
+.zukan-item .size-tag.big {
+  background: #ffe2a8;
+}
+/* まだ見つけていない商品の影（絵文字の形） */
+.sil-emoji {
+  font-size: 1.1em;
+  line-height: 1;
+}

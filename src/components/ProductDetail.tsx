@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { COUPONS, couponApplies, STAR_STEPS, starsOf } from '../data/config'
 import { gameById } from '../data/games'
-import { productById, purchaseStamps } from '../data/products'
+import { otherSize, productById, purchaseStamps } from '../data/products'
 import { Pack } from './Pack'
 import { yen } from '../lib/util'
 import { usableCoupons, useStore } from '../store'
@@ -11,6 +11,7 @@ export function ProductDetail({ id, onClose }: { id: string; onClose: () => void
   const { state } = useStore()
   const [linkNote, setLinkNote] = useState(false)
   const p = productById(id)
+  const other = otherSize(p)
   const games = state.seen[id] ?? []
   const met = state.met[id] ?? 0
   const star = starsOf(met)
@@ -35,6 +36,14 @@ export function ProductDetail({ id, onClose }: { id: string; onClose: () => void
         </dd>
         <dt>内容量</dt>
         <dd>{p.amount}</dd>
+        {other && (
+          <>
+            <dt>{p.bigOf ? 'ふつうの袋' : '大袋'}</dt>
+            <dd>
+              {other.name}（{other.amount}）もあります
+            </dd>
+          </>
+        )}
         <dt>調理方法</dt>
         <dd>{p.cook}</dd>
         <dt>価格の目安</dt>

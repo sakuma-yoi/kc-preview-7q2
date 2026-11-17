@@ -22,6 +22,9 @@ export const GENRE_COLOR: Record<Genre, string> = {
   デザート: '#1f86b8',
 }
 
+/** 大きさ違いの商品（大袋ならふつうの袋、ふつうの袋なら大袋） */
+export const otherSize = (p: Product) => PRODUCTS.find((x) => (p.bigOf ? x.id === p.bigOf : x.bigOf === p.id))
+
 /** 脳トレの中で使う呼び名 */
 export const shortName = (p: Product) => p.shortName ?? p.name
 

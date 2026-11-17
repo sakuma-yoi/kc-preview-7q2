@@ -25,6 +25,8 @@ export type Product = {
   rangeSec?: number
   /** 購入ページのURL。書くと商品詳細の「買えるお店を見る」がリンクになる */
   buyUrl?: string
+  /** 大袋（もりもりパックなど）のとき、ふつうの袋の商品の id。図鑑に「大袋」「大袋あり」と出る */
+  bigOf?: string
   /** 買い物リスト暗記で並ぶ棚。書かなければジャンルから決まる */
   shelf?: ShelfId
 }

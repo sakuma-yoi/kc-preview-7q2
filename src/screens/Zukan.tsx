@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Thumb } from '../components/Pack'
-import { PIcon } from '../components/PIcon'
+import { Silhouette } from '../components/PIcon'
 import { Sheet } from '../components/Sheet'
 import { featuredFor, STAR_STEPS, starsOf } from '../data/config'
 import { GAMES } from '../data/games'
-import { GENRES, PRODUCTS, productById, shortName, type Genre, type Product, type ProductType } from '../data/products'
+import { GENRES, otherSize, PRODUCTS, productById, shortName, type Genre, type Product, type ProductType } from '../data/products'
 import { productsFor, today, useStore } from '../store'
 
 type Props = { onProduct: (id: string) => void }
@@ -69,7 +69,7 @@ export function Zukan({ onProduct }: Props) {
               <li key={id}>
                 <button onClick={() => (ok ? onProduct(id) : setHint(p))}>
                   <span className={ok ? '' : 'shadow'} aria-hidden="true">
-                    {ok ? <Thumb id={p.id} /> : <PIcon id={p.id} />}
+                    {ok ? <Thumb id={p.id} /> : <Silhouette id={p.id} />}
                   </span>
                   <strong>{ok ? shortName(p) : 'この商品を探そう！'}</strong>
                 </button>
@@ -110,6 +110,8 @@ export function Zukan({ onProduct }: Props) {
                 {isNew && <em>はっけん！</em>}
                 <span aria-hidden="true">{ok ? <Thumb id={p.id} /> : '🔒'}</span>
                 <strong>{ok ? shortName(p) : '？？？'}</strong>
+                {ok && p.bigOf && <small className="size-tag big">大袋</small>}
+                {ok && !p.bigOf && otherSize(p) && <small className="size-tag">大袋あり</small>}
                 {ok && <Stars n={starsOf(state.met[p.id] ?? 0)} />}
               </button>
             </li>
@@ -121,7 +123,7 @@ export function Zukan({ onProduct }: Props) {
       {hint && (
         <Sheet title="この商品を探そう！" onClose={() => setHint(null)}>
           <p className="product-hero shadow" aria-hidden="true">
-            <PIcon id={hint.id} />
+            <Silhouette id={hint.id} />
           </p>
           <p className="note">
             ヒント：<b>{hint.type}</b>の<b>{hint.genre}</b>です。

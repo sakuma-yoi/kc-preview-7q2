@@ -294,6 +294,12 @@ export function PIcon({ id }: { id: string }) {
   )
 }
 
+/** まだ見つけていない商品の影。写真は四角い影になってしまうので、写真の商品は絵文字の形で影にする */
+export function Silhouette({ id }: { id: string }) {
+  if (PHOTOS[id]) return <span className="sil-emoji">{PRODUCTS.find((p) => p.id === id)?.icon ?? '？'}</span>
+  return <PIcon id={id} />
+}
+
 /** 販促商品ではない一般の商品の、色つきの箱の絵（買い物リスト暗記の売り場で使う） */
 export function GenericPack({ color }: { color: string }) {
   return (
