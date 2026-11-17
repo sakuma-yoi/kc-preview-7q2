@@ -1,5 +1,6 @@
 // 脳トレの設定と、各ゲームに登場する商品の初期設定
 
+import catalog from '#catalog'
 import { PRODUCTS, shortName } from './products'
 
 export type Category = '記憶' | '計算' | '観察' | '言葉'
@@ -43,8 +44,8 @@ const all = PRODUCTS.map((p) => p.id)
 
 /** ゲームごとの登場商品（初期設定）。運営メニューから変更できる */
 export const DEFAULT_GAME_PRODUCTS: Record<string, string[]> = {
-  // お弁当に入りそうな商品だけ
-  freezer: ['karaage', 'ebifry', 'gyoza', 'onigiri', 'broccoli', 'hamburg', 'potesala', 'takoyaki', 'potato'],
+  // お弁当に入りそうな商品だけ（src/catalog/ に書く）
+  freezer: catalog.bento,
   register: all,
   diff: all,
   pairs: all,

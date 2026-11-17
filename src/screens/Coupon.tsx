@@ -100,7 +100,8 @@ export function Coupon({ onProduct }: { onProduct: (id: string) => void }) {
 
       {tab === 'get' ? (
         <ul className="coupon-list">
-          {COUPONS.map((c) => {
+          {/* 使える商品がないクーポンは出さない（チルドの商品がないときなど） */}
+          {COUPONS.filter((c) => PRODUCTS.some((p) => couponApplies(c, p))).map((c) => {
             const short = c.cost - state.tickets
             return (
               <li key={c.id} className="coupon">

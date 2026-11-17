@@ -6,6 +6,8 @@
 //   ・まちがえると同じレベルのまま。続けて MISSES_TO_DOWN 回まちがえると、1つ下がる
 // 表の上の行がレベル0。行を足せば、上のレベルを増やせる
 
+import catalog from '#catalog'
+
 /** 続けて何回まちがえると、レベルが1つ下がるか */
 export const MISSES_TO_DOWN = 2
 
@@ -78,17 +80,8 @@ export const ODDONE = [
   { cells: 16, cols: 4, subtle: true, hue: 60, similar: false, jitter: false },
   { cells: 20, cols: 4, subtle: true, hue: 60, similar: false, jitter: true },
 ]
-/** 見た目の似た商品の組み合わせ（仲間はずれ探しで使う）。商品を差し替えたら合わせて直す */
-export const ODDONE_LOOKALIKE: [string, string][] = [
-  ['karaage', 'takoyaki'],
-  ['pizza', 'onigiri'],
-  ['pasta', 'chahan'],
-  ['curry', 'hamburg'],
-  ['ice', 'potesala'],
-  ['ebifry', 'potato'],
-  ['gyoza', 'onigiri'],
-  ['chahan', 'potesala'],
-]
+/** 見た目の似た商品の組み合わせ（仲間はずれ探しで使う）。src/catalog/ に書く */
+export const ODDONE_LOOKALIKE: [string, string][] = catalog.lookalike
 /** バラつきの大きさ：傾き（度）と大きさ（倍） */
 export const ODDONE_JITTER = { rotate: 14, scale: [0.82, 1.12] }
 

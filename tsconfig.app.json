@@ -6,7 +6,7 @@
     "module": "esnext",
     "types": ["vite/client"],
     "resolveJsonModule": true,
-    "paths": { "#brand": ["./src/brand.json"] },
+    "paths": { "#brand": ["./src/brand.json"], "#catalog": ["./src/catalog/sample.ts"] },
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
 

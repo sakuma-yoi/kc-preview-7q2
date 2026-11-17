@@ -1,5 +1,7 @@
 // 報酬の数値、くじ、クーポン、特集、バナーはここで調整する
 
+import catalog from '#catalog'
+
 /** スタンプカード1枚のマス数。いっぱいになると交換チケット1枚 */
 export const CARD_SIZE = 10
 
@@ -55,23 +57,10 @@ export const COUPON_DAYS = 30
 export const COUPON_SOON_DAYS = 7
 
 /** ホームのおすすめ商品バナー */
-export const BANNER = { productId: 'gyoza', label: 'NEW' }
+export const BANNER = catalog.banner
 
 /** 図鑑の「今月の特集」。月（1〜12）ごとに3品。季節に合わせて入れ替える */
-export const FEATURED_BY_MONTH: Record<number, string[]> = {
-  1: ['oden', 'ramen', 'gyoza'],
-  2: ['oden', 'curry', 'hamburg'],
-  3: ['karaage', 'ebifry', 'broccoli'],
-  4: ['karaage', 'onigiri', 'potesala'],
-  5: ['pizza', 'potato', 'takoyaki'],
-  6: ['pasta', 'chahan', 'broccoli'],
-  7: ['ice', 'takoyaki', 'potato'],
-  8: ['ice', 'pizza', 'chahan'],
-  9: ['curry', 'hamburg', 'pasta'],
-  10: ['hamburg', 'onigiri', 'karaage'],
-  11: ['gyoza', 'oden', 'ramen'],
-  12: ['oden', 'pizza', 'ice'],
-}
+export const FEATURED_BY_MONTH: Record<number, string[]> = catalog.featuredByMonth
 export const featuredFor = (d: Date) => FEATURED_BY_MONTH[d.getMonth() + 1]
 
 /** 図鑑の★：出会った回数がこの数に届くと★1・★2・★3 */
@@ -93,4 +82,4 @@ export const ODDONE_LATE: 'color' | 'flip' = 'color'
 /** 冷凍庫脳年齢：100点で20歳、0点で55歳 */
 export const brainAge = (score: number) => Math.round(20 + (100 - score) * 0.35)
 
-export const APP_VERSION = '1.9.0'
+export const APP_VERSION = '1.10.0'

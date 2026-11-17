@@ -254,7 +254,9 @@ export function Value({ onDone }: GameProps) {
   const q = useMemo(() => {
     const lv = VALUE[r.level]
     for (let tries = 0; tries < 60; tries++) {
-      const kind = VALUE_KINDS[randInt(VALUE_KINDS.length)]
+      // くらべる数より大きさの種類が少ない商品は出さない
+      const kinds = VALUE_KINDS.filter((k) => k.sizes.length >= lv.options)
+      const kind = kinds[randInt(kinds.length)]
       const sizes = sample(kind.sizes, lv.options).sort((a, b) => a - b)
       const gap = lv.gap[0] + Math.random() * (lv.gap[1] - lv.gap[0])
       const bestUnit = kind.per100 * (0.85 + Math.random() * 0.25)

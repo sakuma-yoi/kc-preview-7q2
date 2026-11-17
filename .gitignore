@@ -4,3 +4,5 @@ dist-single
 *.local
 .DS_Store
 src/brand.private.json
+src/catalog/private.ts
+src/assets/private/

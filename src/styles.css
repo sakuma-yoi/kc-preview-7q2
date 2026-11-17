@@ -781,6 +781,9 @@ button:focus-visible {
   font-weight: 700;
   font-size: 15px;
 }
+.filter.small {
+  flex-wrap: wrap;
+}
 .filter.small button {
   min-height: 38px;
   padding: 0 13px;

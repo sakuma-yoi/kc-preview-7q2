@@ -10,6 +10,8 @@ import { productsFor, today, useStore } from '../store'
 type Props = { onProduct: (id: string) => void }
 
 /** ★の数（3つのうちいくつ光っているか） */
+const TYPES = (['冷凍', 'チルド'] as const).filter((t) => PRODUCTS.some((p) => p.type === t))
+
 export function Stars({ n }: { n: number }) {
   return (
     <span className="stars" aria-label={`★${n}`}>
@@ -77,13 +79,16 @@ export function Zukan({ onProduct }: Props) {
         </ul>
       </section>
 
-      <div className="filter" role="group" aria-label="種類でしぼる">
-        {(['すべて', '冷凍', 'チルド'] as const).map((t) => (
-          <button key={t} className={type === t ? 'on' : ''} onClick={() => setType(t)}>
-            {t}
-          </button>
-        ))}
-      </div>
+      {/* 種類が1つしかないとき（冷凍だけなど）は出さない */}
+      {TYPES.length > 1 && (
+        <div className="filter" role="group" aria-label="種類でしぼる">
+          {(['すべて', ...TYPES] as const).map((t) => (
+            <button key={t} className={type === t ? 'on' : ''} onClick={() => setType(t)}>
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="filter small" role="group" aria-label="ジャンルでしぼる">
         {(['すべて', ...GENRES] as const).map((g) => (
           <button key={g} className={genre === g ? 'on' : ''} onClick={() => setGenre(g)}>

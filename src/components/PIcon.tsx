@@ -1,13 +1,16 @@
 // 商品のアイコン（どの機種でも同じ絵になるよう、SVGで描く）
-// 商品を追加したときは、ここに同じ id で絵を足す。絵がない商品は products.ts の絵文字で表示する
+// 商品を追加したときは、ここに同じ id で絵を足す。絵がない商品は商品データ（src/catalog/）の絵文字で表示する
 
 import type { ReactNode } from 'react'
+import catalog from '#catalog'
 import { PRODUCTS } from '../data/products'
 
 // src/assets/icons/<id>.svg（png・webp も可）を置くと、下の絵のかわりにその画像を使う
 const FILES = import.meta.glob('../assets/icons/*.{svg,png,webp}', { eager: true, import: 'default' }) as Record<string, string>
 const CUSTOM: Record<string, string> = {}
 for (const [path, url] of Object.entries(FILES)) CUSTOM[path.split('/').pop()!.replace(/\.\w+$/, '')] = url
+// 商品データに画像があれば、それを使う（src/catalog/）
+Object.assign(CUSTOM, catalog.images)
 
 const plate = <ellipse cx="24" cy="33" rx="21" ry="10" fill="#fff" stroke="#c9dde7" strokeWidth="1.5" />
 

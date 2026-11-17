@@ -13,6 +13,8 @@ const here = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 // アプリの名前：BRAND=private のときだけ本当の名前（src/brand.private.json）。それ以外は仮の名前
 const brandFile = here(process.env.BRAND === 'private' && existsSync(here('./src/brand.private.json')) ? './src/brand.private.json' : './src/brand.json')
 const brand = JSON.parse(readFileSync(brandFile, 'utf-8'))
+// 商品：BRAND=private のときだけ本物の商品（src/catalog/private.ts・公開しない）。それ以外は仮の商品
+const catalogFile = here(process.env.BRAND === 'private' && existsSync(here('./src/catalog/private.ts')) ? './src/catalog/private.ts' : './src/catalog/sample.ts')
 const appName = {
   name: 'app-name',
   transformIndexHtml: (html: string) => html.replaceAll('__APP_NAME__', brand.name),
@@ -28,7 +30,7 @@ export default defineConfig({
   base: './',
   // 確認用の1ファイル版では、画像もファイルの中に埋め込む
   build: single ? { assetsInlineLimit: 100_000_000 } : {},
-  resolve: { alias: { '#fonts': here(single ? './src/fonts.empty.ts' : './src/fonts.ts'), '#brand': brandFile } },
+  resolve: { alias: { '#fonts': here(single ? './src/fonts.empty.ts' : './src/fonts.ts'), '#brand': brandFile, '#catalog': catalogFile } },
   plugins: [
     react(),
     appName,
