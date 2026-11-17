@@ -67,6 +67,13 @@ export function Bento({ products, onDone }: GameProps) {
   return (
     <Stage
       r={r}
+      coach={
+        open
+          ? 'おかずの絵を覚えましょう。少したつと、ふたが閉まります'
+          : q.askInside
+            ? '入っていたおかずを、下から1つ選んでタップします'
+            : '今度は「入っていなかった」おかずを選びます'
+      }
       question={
         open ? (
           'お弁当の中身を覚えてください'
@@ -152,7 +159,17 @@ export function Register({ products, onDone }: GameProps) {
   const label = (c: number) => (q.band ? `${c.toLocaleString('ja-JP')}円台` : yen(c))
 
   return (
-    <Stage r={r} question={!done ? 'レジに通しています…' : q.band ? '合計は、何円台？' : '合計はいくら？'}>
+    <Stage
+      r={r}
+      question={!done ? 'レジに通しています…' : q.band ? '合計は、何円台？' : '合計はいくら？'}
+      coach={
+        !done
+          ? '商品がレジを通ります。値段を見ておきましょう'
+          : q.band
+            ? 'ぴったりでなくてOK。たとえば合計が630円なら「600円台」です'
+            : '値段をたして、合計を選びます'
+      }
+    >
       <div className="register">
         <div className="reg-display" aria-live="polite">
           {last ? (
@@ -237,6 +254,7 @@ export function Range({ products, onDone }: GameProps) {
   return (
     <Stage
       r={r}
+      coach="＋−で時間を合わせて「この時間であたためる」。W数が2倍なら、時間は半分です"
       question={
         <>
           家のレンジは<b>{q.to}W</b>。何分何秒あたためる？
@@ -333,6 +351,7 @@ export function OddOne({ products, onDone }: GameProps) {
   return (
     <Stage
       r={r}
+      coach="1つだけ違う絵があります。見つけたらタップ。まちがえても、もう1回押せます"
       question={!q.colorOnly ? '1つだけ違う商品はどれ？' : ODDONE_LATE === 'color' ? '色が1つだけ違います。どれ？' : '1つだけ さかさまです。どれ？'}
     >
       <p className="hud">

@@ -2965,3 +2965,79 @@ a.btn {
   flex: 0 1 22px;
   min-width: 6px;
 }
+
+/* 練習（チュートリアル） */
+.coach {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--yellow);
+  color: var(--ink);
+  box-shadow: 0 3px 0 #d9a400;
+  animation: rise 0.25s ease-out;
+}
+.coach p {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.coach-tag {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+}
+/* 練習中は、押すところをゆっくり光らせる */
+.stage.practice :is(.tile, .cell, .card-btn, .case, .letters button, .ts-col button, .wallet-grid .money, .value-card, .checkout:not(:disabled), .btn.play:not(:disabled)) {
+  animation: guide 1.6s ease-in-out infinite;
+}
+@keyframes guide {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(226, 65, 43, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(226, 65, 43, 0.45);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage.practice * {
+    animation: none !important;
+  }
+}
+.practice-done {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: center;
+}
+.practice-done h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  color: var(--freeze-deep);
+}
+.practice-done p {
+  font-size: 17px;
+}
+.play-bar .skip {
+  flex: none;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--line);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.intro .practice-note {
+  font-size: 15px;
+  color: var(--ink-soft);
+}

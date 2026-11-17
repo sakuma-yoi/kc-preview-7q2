@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { SCORE_ACCURACY, SCORE_SPEED } from '../data/config'
 import { MISSES_TO_DOWN } from '../data/levels'
 import type { Product } from '../data/products'
@@ -29,7 +29,13 @@ export type Step = 'up' | 'keep' | 'miss'
  * 問題の進行・得点（正確さ＋速さ）・覚えた商品・難しさのレベルをまとめて管理する
  * levels はレベルの数（src/data/levels.ts の表の行数）。1問目はレベル0から
  */
-export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace, levels = 1) {
+/** 練習（チュートリアル）中か。練習では1問だけ、いちばんやさしいレベルで、時間制限もなし */
+export const PracticeContext = createContext(false)
+export const usePractice = () => useContext(PracticeContext)
+
+export function useRounds(totalQuestions: number, onDone: GameProps['onDone'], pace: Pace, levels = 1) {
+  const practice = useContext(PracticeContext)
+  const total = practice ? 1 : totalQuestions
   const [round, setRound] = useState(0)
   const [level, setLevel] = useState(0)
   const levelRef = useRef(0)
@@ -110,17 +116,30 @@ export function useRounds(total: number, onDone: GameProps['onDone'], pace: Pace
   return { round, level, levels, total, mark, see, startClock, answer }
 }
 
-type StageProps = { r: ReturnType<typeof useRounds>; question: ReactNode; children: ReactNode }
+type StageProps = {
+  r: ReturnType<typeof useRounds>
+  question: ReactNode
+  /** 練習のときだけ出す、いまやることの案内 */
+  coach?: string
+  children: ReactNode
+}
 
-export function Stage({ r, question, children }: StageProps) {
+export function Stage({ r, question, coach, children }: StageProps) {
   const { state } = useStore()
+  const practice = useContext(PracticeContext)
   // いまの難しさ（試しに表示。運営メニューで消せる）
-  const showLevel = state.settings.showLevel !== false && r.levels > 1
+  const showLevel = !practice && state.settings.showLevel !== false && r.levels > 1
   return (
-    <div className="stage">
+    <div className={`stage ${practice ? 'practice' : ''}`}>
+      {practice && (
+        <div className="coach" role="note" key={coach}>
+          <span className="coach-tag">練習</span>
+          <p>{coach ?? 'やってみましょう。点数には入りません'}</p>
+        </div>
+      )}
       <div className="stage-top">
         <span className="q-no">
-          第{r.round + 1}問<small> / 全{r.total}問</small>
+          {practice ? '練習問題' : <>第{r.round + 1}問<small> / 全{r.total}問</small></>}
           {showLevel && (
             <span className="lv-chip" key={r.level}>
               レベル {r.level + 1}

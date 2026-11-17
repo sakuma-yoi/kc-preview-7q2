@@ -98,7 +98,11 @@ export function Diff({ products, onDone }: GameProps) {
   const r = useRounds(3, onDone, PACE.diff, DIFF.length)
   const diffs = DIFF[r.level].diffs
   return (
-    <Stage r={r} question={`下の絵から、違うところを${diffs}つ見つけてください`}>
+    <Stage
+      r={r}
+      question={`下の絵から、違うところを${diffs}つ見つけてください`}
+      coach="上の「おてほん」と下の絵をくらべて、違うところを下の絵でタップします"
+    >
       <DiffRound
         key={r.round}
         products={products}
@@ -211,7 +215,7 @@ export function Pairs({ products, onDone }: GameProps) {
   const items = useMemo(() => sample(products, lv.pairs), [r.round]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => r.see(items.map((p) => p.id)), [r.round]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <Stage r={r} question="同じ商品のペアをそろえてください">
+    <Stage r={r} question="同じ商品のペアをそろえてください" coach="最初に表になるカードの場所を覚えます。そのあと2枚ずつめくって、同じ商品をそろえます">
       <PairsRound
         key={r.round}
         items={items}
@@ -397,7 +401,11 @@ export function Memo({ products, onDone }: GameProps) {
   const r = useRounds(4, onDone, PACE.memo, MEMO.length)
   const { items: n, perShelf } = MEMO[r.level]
   return (
-    <Stage r={r} question="メモの商品を、売り場から探してかごに入れてください">
+    <Stage
+      r={r}
+      question="メモの商品を、売り場から探してかごに入れてください"
+      coach="メモを覚えたら、冷凍庫をタップして中に入り、メモの商品をタップしてかごへ。全部入れたら「レジへ進む」"
+    >
       <MemoRound
         key={r.round}
         products={products}
@@ -490,7 +498,7 @@ export function Anagram({ products, onDone }: GameProps) {
   const product = picks[r.round]
   useEffect(() => r.see([product.id]), [r.round]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <Stage r={r} question="文字を順番にタップして、商品名を作ってください">
+    <Stage r={r} question="文字を順番にタップして、商品名を作ってください" coach="下の黄色い文字を、商品名の順にタップします。まちがえたら「1文字もどす」">
       <AnagramRound key={r.round} product={product} onEnd={(pts, ok) => r.answer(pts, ok, ok ? 900 : 1700)} />
     </Stage>
   )

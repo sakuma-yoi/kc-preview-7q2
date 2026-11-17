@@ -43,6 +43,8 @@ export type State = {
   met: Record<string, number>
   /** 図鑑でまだ見ていない、新しく見つけた商品 */
   fresh: string[]
+  /** 練習（チュートリアル）を終えた脳トレ */
+  tutorials: string[]
   /** 日ごとの冷凍庫脳年齢（その日に遊んだ回の平均を出すための合計と回数） */
   ages: Record<string, { sum: number; n: number }>
   purchase: { week: string; count: number }
@@ -70,6 +72,7 @@ export const initialState = (): State => ({
   seen: {},
   met: {},
   fresh: [],
+  tutorials: [],
   ages: {},
   purchase: { week: '', count: 0 },
   coupons: [],

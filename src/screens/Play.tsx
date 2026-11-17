@@ -6,7 +6,7 @@ import { brainAge, type Prize } from '../data/config'
 import { gameById } from '../data/games'
 import { productById } from '../data/products'
 import { GAME_COMPONENTS } from '../games'
-import type { Detail } from '../games/common'
+import { PracticeContext, type Detail } from '../games/common'
 import { sfx } from '../lib/sfx'
 import {
   claimDaily,
@@ -39,7 +39,14 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
   const Game = GAME_COMPONENTS[gameId]
   const [products] = useState(() => productsFor(state, gameId))
 
-  const [phase, setPhase] = useState<'intro' | 'play' | 'result'>('intro')
+  const [phase, setPhase] = useState<'intro' | 'practice' | 'practiceDone' | 'play' | 'result'>('intro')
+  // 練習（チュートリアル）：その脳トレを初めて遊ぶときと、今日の脳トレのときは毎回
+  const needPractice = daily || !(state.tutorials ?? []).includes(gameId)
+  const [practiceOk, setPracticeOk] = useState(false)
+  const [practiceRun, setPracticeRun] = useState(0)
+  const markTutorial = () => {
+    if (!(state.tutorials ?? []).includes(gameId)) update((s) => void (s.tutorials = [...(s.tutorials ?? []), gameId]))
+  }
   const [run, setRun] = useState(0)
   const [quit, setQuit] = useState(false)
   const [result, setResult] = useState<(PlayResult & { score: number; detail: Detail; learned: string[]; lottery: boolean }) | null>(null)
@@ -51,7 +58,7 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
   const firstBack = useRef(back)
   useEffect(() => {
     if (back === firstBack.current) return
-    if (phase === 'play') setQuit((q) => !q)
+    if (phase === 'play' || phase === 'practice') setQuit((q) => !q)
     else if (phase === 'intro' || !result?.lottery) onExit(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [back])
@@ -78,6 +85,77 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
     setRewards(out)
     setLottery('rewards')
     sfx('stamp')
+  }
+
+  if (phase === 'practice' || phase === 'practiceDone') {
+    return (
+      <div className="gamewrap">
+        <header className="play-bar">
+          <button className="icon-btn" onClick={() => setQuit(true)} aria-label="やめる">
+            ×
+          </button>
+          <h1>{game.name}</h1>
+          {phase === 'practice' && (
+            <button
+              className="skip"
+              onClick={() => {
+                markTutorial()
+                setPhase('play')
+              }}
+            >
+              練習をとばす
+            </button>
+          )}
+        </header>
+        {phase === 'practice' ? (
+          <PracticeContext.Provider value={true}>
+            <Game
+              key={`p${practiceRun}`}
+              products={products}
+              onDone={(score) => {
+                setPracticeOk(score > 0)
+                markTutorial()
+                setPhase('practiceDone')
+              }}
+            />
+          </PracticeContext.Provider>
+        ) : (
+          <div className="practice-done">
+            <h2>練習おわり！</h2>
+            <p>{practiceOk ? 'できました。この調子で本番にいきましょう。' : 'だいじょうぶ。やり方がわかれば本番でできます。'}</p>
+            <p className="note">本番は全{game.questions}問です。正解が続くと、少しずつ難しくなります。</p>
+            <button
+              className="btn play"
+              onClick={() => {
+                sfx('tap')
+                setPhase('play')
+              }}
+            >
+              {BRAND.start}
+            </button>
+            <button
+              className="btn ghost"
+              onClick={() => {
+                setPracticeRun((n) => n + 1)
+                setPhase('practice')
+              }}
+            >
+              もう一度練習する
+            </button>
+          </div>
+        )}
+        {quit && (
+          <Sheet title="やめますか？" onClose={() => setQuit(false)}>
+            <button className="btn play" onClick={() => setQuit(false)}>
+              つづける
+            </button>
+            <button className="btn ghost" onClick={() => onExit(0)}>
+              やめる
+            </button>
+          </Sheet>
+        )}
+      </div>
+    )
   }
 
   if (phase === 'play') {
@@ -280,14 +358,15 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
           </ul>
         </section>
 
+        {needPractice && <p className="practice-note">はじめに、練習問題を1問やってみます（点数には入りません）</p>}
         <button
           className="btn play"
           onClick={() => {
             sfx('tap')
-            setPhase('play')
+            setPhase(needPractice ? 'practice' : 'play')
           }}
         >
-          {BRAND.start}
+          {needPractice ? '練習してから始める' : BRAND.start}
         </button>
       </div>
     </div>

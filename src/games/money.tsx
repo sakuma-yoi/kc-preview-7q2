@@ -7,7 +7,7 @@ import { PRODUCTS, shortName } from '../data/products'
 import { amountLabel, VALUE_KINDS } from '../data/value'
 import { sfx } from '../lib/sfx'
 import { randInt, sample, shuffle, yen } from '../lib/util'
-import { numberChoices, Stage, useRounds, type GameProps } from './common'
+import { numberChoices, Stage, usePractice, useRounds, type GameProps } from './common'
 
 /* ---------- お釣りマスター ---------- */
 
@@ -70,7 +70,11 @@ export function Change({ products, onDone }: GameProps) {
   }
 
   return (
-    <Stage r={r} question="出す枚数とお釣りの枚数が、合わせていちばん少なくなるように払ってください">
+    <Stage
+      r={r}
+      question="出す枚数とお釣りの枚数が、合わせていちばん少なくなるように払ってください"
+      coach="下のお金をタップして出し、「これで払う」を押します。まちがえて出したお金は、トレーの中をタップするともどせます"
+    >
       <div className="reg-display big">
         <span>
           お会計{q.tax && <small>（税込）</small>}
@@ -200,7 +204,7 @@ export function Discount({ products, onDone }: GameProps) {
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Stage r={r} question="割引のあとのお値段は？">
+    <Stage r={r} question="割引のあとのお値段は？" coach="値札の金額から、シールの分だけ引きます。半額は半分、2割引は20%引きのことです">
       <div className="sale-card">
         <div className="sale-pic">
           <PIcon id={q.p.id} />
@@ -246,6 +250,7 @@ const per100 = (price: number, size: number) => (price * 100) / size
 
 export function Value({ onDone }: GameProps) {
   const r = useRounds(5, onDone, PACE.value, VALUE.length)
+  const practice = usePractice()
   const q = useMemo(() => {
     const lv = VALUE[r.level]
     for (let tries = 0; tries < 60; tries++) {
@@ -280,7 +285,8 @@ export function Value({ onDone }: GameProps) {
     setTimeUp(false)
     answered.current = false
     if (PROMO_IDS.has(q.kind.icon)) r.see([q.kind.icon])
-    // 時間切れは不正解
+    // 時間切れは不正解（練習では時間切れなし）
+    if (practice) return
     const t = window.setTimeout(() => {
       if (answered.current) return
       answered.current = true
@@ -294,10 +300,12 @@ export function Value({ onDone }: GameProps) {
   const done = picked !== null || timeUp
 
   return (
-    <Stage r={r} question="どれがいちばんお得？">
-      <div className="timer" key={r.round}>
-        <i style={{ animationDuration: `${q.timeMs}ms`, animationPlayState: done ? 'paused' : 'running' }} />
-      </div>
+    <Stage r={r} question="どれがいちばんお得？" coach="大きいほうが安いとは限りません。だいたいでOK。練習では時間切れはありません">
+      {!practice && (
+        <div className="timer" key={r.round}>
+          <i style={{ animationDuration: `${q.timeMs}ms`, animationPlayState: done ? 'paused' : 'running' }} />
+        </div>
+      )}
       <div className={`value-row n${q.opts.length}`}>
         {q.opts.map((o, i) => {
           const isBest = o === q.best
