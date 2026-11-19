@@ -27,6 +27,8 @@ export const PACE = {
   sweeper: { fast: 25, slow: 100 },
   cups: { fast: 12, slow: 60 },
   unshuffle: { fast: 6, slow: 25 },
+  nori: { fast: 6, slow: 30 },
+  cube: { fast: 10, slow: 60 },
 }
 
 /** お弁当の具材記憶。items＝お弁当のおかずの数、lookSec＝見られる秒数、choices＝選択肢の数、askOutside＝「入っていなかったのは？」も出すか */
@@ -194,3 +196,21 @@ export const UNSHUFFLE = [
   { size: 4, swaps: 3, ms: 800, fastSec: 13 },
   { size: 4, swaps: 4, ms: 700, fastSec: 15 },
 ]
+
+/**
+ * 海苔の切り絵。fx×fy 枚に重ねて折る（じゃばら折り）。stamps＝切り込みの数、options＝選択肢の数
+ * fastSec＝この秒数までに正しく選ぶと◎（こえると○）
+ */
+export const NORI = [
+  { fx: 2, fy: 2, stamps: 2, options: 3, fastSec: 12 },
+  { fx: 3, fy: 2, stamps: 2, options: 3, fastSec: 14 },
+  { fx: 4, fy: 2, stamps: 3, options: 4, fastSec: 16 },
+  { fx: 3, fy: 3, stamps: 3, options: 4, fastSec: 18 },
+  { fx: 4, fy: 3, stamps: 3, options: 4, fastSec: 20 },
+]
+
+/** フローズンキューブ。scramble＝崩すときに回す回数 */
+export const CUBE = [{ scramble: 1 }, { scramble: 2 }, { scramble: 3 }]
+/** フローズンキューブ：目安の時間（秒）＝いちばん少ない手数 × CUBE_SEC_PER_MOVE ＋ CUBE_SEC_BASE。こえると判定が1段階下がる */
+export const CUBE_SEC_PER_MOVE = 10
+export const CUBE_SEC_BASE = 10

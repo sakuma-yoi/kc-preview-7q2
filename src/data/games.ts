@@ -34,6 +34,8 @@ export const GAMES: Game[] = [
   { id: 'value', name: '損得勘定', category: '計算', summary: '大きさと値段から、お得なほうを選ぶ', rule: '大きさと値段のちがう商品をくらべて、いちばんお得なものを、時間内にぱっと選んでください。答えたあとに100gあたりの値段が出ます。', questions: 5, minutes: 1, icon: '⚖️', minProducts: 1 },
   { id: 'sweeper', name: '霜とりスイーパー', category: '観察', summary: '数字をヒントに、霜の下の商品をよける', rule: '冷凍庫の霜の下に商品がかくれています。霜のマスをタップして選び、下のボタンで「削る」か「旗を立てる」を選びます。削ったマスの数字は、まわり8マスにかくれている商品の数です。数字をヒントに、商品を割らないように霜だけを全部削ってください。数字をタップすると、まわりの旗の数が数字と同じならまわりの霜をまとめて削り、のこりの霜が全部商品だとわかるとき（数字−旗の数＝霜の数）はまとめて旗を立てます。はじめからいくつかのマスは削ってあり、数字だけで最後まで解けるようになっています。', questions: 3, minutes: 3, icon: '⛏️', minProducts: 3 },
   { id: 'unshuffle', name: '逆算シャッフル', category: '記憶', summary: '入れかわった冷蔵庫の、元の場所を当てる', rule: '扉の閉まった冷蔵庫が並んでいます。行や列ごとに何回か入れかわるので、動きをよく見ていてください。扉が開いたら、指定された商品が最初どこにあったかを、最初の並びの盤でタップして答えます。入れかえは1回だけ見直せますが、判定が1段階下がります。', questions: 5, minutes: 2, icon: '🔀', minProducts: 9 },
+  { id: 'nori', name: '海苔の切り絵', category: '観察', summary: '折った海苔のうち、開くと完成品になるものを選ぶ', rule: '海苔を何枚かに重ねて折り、切り込みを入れました。上の完成品（開いた海苔）と同じ形になるものを、下の折った海苔から選んでください。点線は折り目で、折り目をはさんで切り込みが鏡に映したように広がります。正解が続くと、重ねる枚数が増えます。', questions: 5, minutes: 2, icon: '🍙', minProducts: 0 },
+  { id: 'cube', name: 'フローズンキューブ', category: '観察', summary: '回されたキューブを、元の写真にもどす', rule: '6つの面に商品の写真が描かれたキューブが、何回か回されています。見えている3つの面の軸の先にある矢印ボタン（↻右回し・↺左回し）で回して、元の写真にもどしてください。少ない回数で、目安の時間内にもどせるほど高得点です。', questions: 3, minutes: 3, icon: '🧊', minProducts: 6 },
   { id: 'cups', name: '計量カップ', category: '計算', summary: '2つのカップで、鍋の水を決まった量にする', rule: '大きさのちがう2つのカップで水を量って、鍋の水をちょうど指定の量にしてください。カップをタップして選んでから、蛇口（水をいっぱいに入れる）・鍋（注ぐ）・もう1つのカップ（移す）・流し（捨てる）をタップします。1回動かすたびに、カップを選び直します。少ない手順で、目安の時間内に作れるほど高得点です。', questions: 5, minutes: 2, icon: '🥛', minProducts: 0 },
   { id: 'anagram', name: '商品名シャッフル', category: '言葉', summary: 'バラバラの文字を商品名に並べ替える', rule: 'バラバラになった文字を順番にタップして、商品の名前を作ってください。1問につき2回まで挑戦できます。', questions: 5, minutes: 2, icon: '🔤', minProducts: 5 },
 ]
@@ -41,7 +43,7 @@ export const GAMES: Game[] = [
 export const gameById = (id: string) => GAMES.find((g) => g.id === id)!
 
 /** あたらしい脳トレが届く順番（分類がかたよらないように並べる） */
-export const NEW_GAME_ORDER = ['diff', 'anagram', 'discount', 'pairs', 'range', 'value', 'oddone', 'sweeper', 'change', 'unshuffle', 'memo', 'cups']
+export const NEW_GAME_ORDER = ['diff', 'anagram', 'discount', 'pairs', 'range', 'value', 'oddone', 'sweeper', 'change', 'unshuffle', 'nori', 'memo', 'cups', 'cube']
 
 const all = PRODUCTS.map((p) => p.id)
 
@@ -65,6 +67,9 @@ export const DEFAULT_GAME_PRODUCTS: Record<string, string[]> = {
   // 商品を使わない
   cups: [],
   unshuffle: all,
+  // 商品を使わない
+  nori: [],
+  cube: all,
 }
 
 /** そのゲームに登場させてよい商品か */
