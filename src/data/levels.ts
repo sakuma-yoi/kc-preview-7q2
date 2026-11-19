@@ -26,6 +26,7 @@ export const PACE = {
   anagram: { fast: 4, slow: 16 },
   sweeper: { fast: 25, slow: 100 },
   cups: { fast: 12, slow: 60 },
+  unshuffle: { fast: 6, slow: 25 },
 }
 
 /** お弁当の具材記憶。items＝お弁当のおかずの数、lookSec＝見られる秒数、choices＝選択肢の数、askOutside＝「入っていなかったのは？」も出すか */
@@ -181,3 +182,15 @@ export const CUPS: { kind: 'add' | 'move'; caps: number[][]; steps: [number, num
 /** 計量カップ：目安の時間（秒）＝いちばん少ない手順の数 × CUPS_SEC_PER_STEP ＋ CUPS_SEC_BASE。こえると判定が1段階下がる */
 export const CUPS_SEC_PER_STEP = 6
 export const CUPS_SEC_BASE = 8
+
+/**
+ * 逆算シャッフル。size×size の冷蔵庫の、行か列を swaps 回入れかえる。ms＝1回の入れかえにかける時間（ミリ秒）
+ * fastSec＝この秒数までに正しく答えると◎（こえると○）
+ */
+export const UNSHUFFLE = [
+  { size: 3, swaps: 2, ms: 900, fastSec: 10 },
+  { size: 3, swaps: 3, ms: 800, fastSec: 12 },
+  { size: 4, swaps: 3, ms: 800, fastSec: 12 },
+  { size: 4, swaps: 4, ms: 700, fastSec: 14 },
+  { size: 4, swaps: 5, ms: 650, fastSec: 16 },
+]
