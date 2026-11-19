@@ -32,13 +32,15 @@ export const GAMES: Game[] = [
   { id: 'change', name: 'お釣りマスター', category: '計算', summary: 'お釣りの枚数が少なくなるように払う', rule: 'レジの金額を見て、お金をタップして払います。出す枚数とお釣りの枚数が、合わせていちばん少なければ満点です。どのお金も何枚でも出せます。', questions: 5, minutes: 2, icon: '💴', minProducts: 4 },
   { id: 'discount', name: '割引計算', category: '計算', summary: '割引シールのあとのお値段を答える', rule: '値札と割引シール（半額・〇円引・〇%OFF・〇割引）を見て、割引のあとのお値段を4つの中から選んでください。正解が続くと、シールが2枚になることもあります。', questions: 5, minutes: 1, icon: '🏷️', minProducts: 4 },
   { id: 'value', name: '損得勘定', category: '計算', summary: '大きさと値段から、お得なほうを選ぶ', rule: '大きさと値段のちがう商品をくらべて、いちばんお得なものを、時間内にぱっと選んでください。答えたあとに100gあたりの値段が出ます。', questions: 5, minutes: 1, icon: '⚖️', minProducts: 1 },
+  { id: 'sweeper', name: '霜とりスイーパー', category: '観察', summary: '数字をヒントに、霜の下の商品をよける', rule: '冷凍庫の霜の下に商品がかくれています。霜をタップして削ると、まわり8マスにかくれている商品の数が出ます。数字をヒントに、商品を割らないように霜だけを全部削ってください。商品がありそうなマスには印をつけられます。最初に削るマスには商品はありません。', questions: 3, minutes: 3, icon: '⛏️', minProducts: 3 },
+  { id: 'cups', name: '計量カップ', category: '計算', summary: '2つのカップで、鍋の水を決まった量にする', rule: '大きさのちがう2つのカップで水を量って、鍋の水をちょうど指定の量にしてください。カップには水をいっぱいに入れる・鍋に注ぐ・もう1つのカップに移す・捨てる、ができます。少ない手順で、目安の時間内に作れるほど高得点です。', questions: 5, minutes: 2, icon: '🥛', minProducts: 0 },
   { id: 'anagram', name: '商品名シャッフル', category: '言葉', summary: 'バラバラの文字を商品名に並べ替える', rule: 'バラバラになった文字を順番にタップして、商品の名前を作ってください。1問につき2回まで挑戦できます。', questions: 5, minutes: 2, icon: '🔤', minProducts: 5 },
 ]
 
 export const gameById = (id: string) => GAMES.find((g) => g.id === id)!
 
 /** あたらしい脳トレが届く順番（分類がかたよらないように並べる） */
-export const NEW_GAME_ORDER = ['diff', 'anagram', 'discount', 'pairs', 'range', 'value', 'oddone', 'change', 'memo']
+export const NEW_GAME_ORDER = ['diff', 'anagram', 'discount', 'pairs', 'range', 'value', 'oddone', 'sweeper', 'change', 'memo', 'cups']
 
 const all = PRODUCTS.map((p) => p.id)
 
@@ -58,6 +60,9 @@ export const DEFAULT_GAME_PRODUCTS: Record<string, string[]> = {
   value: all,
   // 名前が6文字以下の商品だけ
   anagram: PRODUCTS.filter((p) => [...shortName(p)].length <= 6).map((p) => p.id),
+  sweeper: all,
+  // 商品を使わない
+  cups: [],
 }
 
 /** そのゲームに登場させてよい商品か */

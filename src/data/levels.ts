@@ -24,6 +24,8 @@ export const PACE = {
   discount: { fast: 6, slow: 20 },
   value: { fast: 2, slow: 7 },
   anagram: { fast: 4, slow: 16 },
+  sweeper: { fast: 25, slow: 100 },
+  cups: { fast: 12, slow: 60 },
 }
 
 /** お弁当の具材記憶。items＝お弁当のおかずの数、lookSec＝見られる秒数、choices＝選択肢の数、askOutside＝「入っていなかったのは？」も出すか */
@@ -155,3 +157,29 @@ export const VALUE = [
   { options: 3, gap: [0.12, 0.2], timeSec: 9 },
   { options: 3, gap: [0.05, 0.1], timeSec: 8 },
 ]
+
+/** 霜とりスイーパー。rows×cols のマスに、items 個の商品がかくれている（最初に削るマスとそのまわりには置かない） */
+export const SWEEPER = [
+  { rows: 4, cols: 4, items: 2 },
+  { rows: 5, cols: 5, items: 3 },
+  { rows: 5, cols: 5, items: 4 },
+  { rows: 6, cols: 6, items: 5 },
+  { rows: 6, cols: 6, items: 7 },
+]
+/** 霜とりスイーパー：商品を1つ割るごとに引く点 */
+export const SWEEPER_PENALTY = 10
+
+/**
+ * 計量カップ。caps＝カップの大きさ（ml）の組み合わせの候補、steps＝いちばん少ない手順の数の範囲
+ * kind：add＝カップで量って鍋に足すだけで作れる問題、move＝カップの間で水を移さないと作れない問題
+ */
+export const CUPS: { kind: 'add' | 'move'; caps: number[][]; steps: [number, number] }[] = [
+  { kind: 'add', caps: [[200, 500], [100, 300], [200, 300]], steps: [2, 4] },
+  { kind: 'add', caps: [[300, 500], [200, 700], [300, 800]], steps: [4, 6] },
+  { kind: 'move', caps: [[300, 500], [200, 500], [300, 700]], steps: [3, 6] },
+  { kind: 'move', caps: [[300, 500], [400, 700], [300, 800], [500, 800]], steps: [5, 8] },
+  { kind: 'move', caps: [[300, 700], [500, 900], [400, 900], [300, 1100]], steps: [7, 10] },
+]
+/** 計量カップ：目安の時間（秒）＝いちばん少ない手順の数 × CUPS_SEC_PER_STEP ＋ CUPS_SEC_BASE。こえると判定が1段階下がる */
+export const CUPS_SEC_PER_STEP = 6
+export const CUPS_SEC_BASE = 8

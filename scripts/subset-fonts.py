@@ -9,6 +9,9 @@ import pathlib, subprocess, sys
 root = pathlib.Path(__file__).resolve().parent.parent
 chars = set()
 for path in [root / 'index.html', root / 'vite.config.ts', *root.glob('src/**/*.ts'), *root.glob('src/**/*.tsx'), *root.glob('src/**/*.css'), *root.glob('src/*.json')]:
+    # 公開しないファイル（本物の商品・アプリ名）の文字は入れない。公開版のフォントから中身が推測されないように
+    if 'private' in path.name:
+        continue
     chars.update(path.read_text(encoding='utf-8'))
 # 数字・英字・かな・記号は、あとから文章を変えても困らないよう全部入れる
 chars.update(chr(c) for c in range(0x20, 0x7F))

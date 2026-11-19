@@ -339,32 +339,35 @@ export function Play({ gameId, daily, back, onExit, onProduct }: Props) {
           <small>点数は「正確さ70点＋速さ30点」。正解した問題の商品が、図鑑に登録されます。</small>
         </p>
 
-        <section className="seen-box">
-          <h3>
-            登場する商品
-            <em>
-              見つけた {found.length} / {products.length}
-            </em>
-          </h3>
-          <ul>
-            {products.map((p) => {
-              const ok = found.includes(p)
-              return (
-                <li key={p.id}>
-                  {ok ? (
-                    <button onClick={() => onProduct(p.id)} aria-label={p.name}>
-                      <span><PIcon id={p.id} /></span>
-                    </button>
-                  ) : (
-                    <div className="unknown" aria-label="まだ見つけていない商品">
-                      ？
-                    </div>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        </section>
+        {/* 商品を使わない脳トレ（計量カップなど）では出さない */}
+        {products.length > 0 && (
+          <section className="seen-box">
+            <h3>
+              登場する商品
+              <em>
+                見つけた {found.length} / {products.length}
+              </em>
+            </h3>
+            <ul>
+              {products.map((p) => {
+                const ok = found.includes(p)
+                return (
+                  <li key={p.id}>
+                    {ok ? (
+                      <button onClick={() => onProduct(p.id)} aria-label={p.name}>
+                        <span><PIcon id={p.id} /></span>
+                      </button>
+                    ) : (
+                      <div className="unknown" aria-label="まだ見つけていない商品">
+                        ？
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+        )}
 
         {needPractice && <p className="practice-note">はじめに、練習問題を1問やってみます（点数には入りません）</p>}
         <button
