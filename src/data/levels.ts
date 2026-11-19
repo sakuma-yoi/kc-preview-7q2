@@ -188,9 +188,9 @@ export const CUPS_SEC_BASE = 8
  * fastSec＝この秒数までに正しく答えると◎（こえると○）
  */
 export const UNSHUFFLE = [
+  { size: 3, swaps: 1, ms: 1000, fastSec: 8 },
   { size: 3, swaps: 2, ms: 900, fastSec: 10 },
   { size: 3, swaps: 3, ms: 800, fastSec: 12 },
-  { size: 4, swaps: 3, ms: 800, fastSec: 12 },
-  { size: 4, swaps: 4, ms: 700, fastSec: 14 },
-  { size: 4, swaps: 5, ms: 650, fastSec: 16 },
+  { size: 4, swaps: 3, ms: 800, fastSec: 13 },
+  { size: 4, swaps: 4, ms: 700, fastSec: 15 },
 ]
