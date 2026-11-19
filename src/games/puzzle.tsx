@@ -25,17 +25,6 @@ function around(i: number, rows: number, cols: number) {
   return out
 }
 
-/** 削ったマスから、0のマスがつながるところまで開いていく */
-function flood(start: number, hidden: boolean[], nums: number[], opened: Set<number>, rows: number, cols: number) {
-  const stack = [start]
-  while (stack.length) {
-    const i = stack.pop()!
-    if (opened.has(i) || hidden[i]) continue
-    opened.add(i)
-    if (nums[i] === 0) stack.push(...around(i, rows, cols))
-  }
-}
-
 /**
  * いま開いているマスから、数字だけでどこまで解けるか（やさしい手筋だけで調べる）
  * 解けたところまでで開いたマスを返す。全部開けば、運にたよらず最後まで解ける
@@ -74,7 +63,7 @@ function solveFrom(start: Set<number>, hidden: boolean[], nums: number[], rows: 
     if (mines.size === total) unknownAll.forEach((j) => safe.add(j))
     else if (total - mines.size === unknownAll.length) unknownAll.forEach((j) => found.add(j))
     for (const j of found) if (!mines.has(j)) (mines.add(j), (progress = true))
-    for (const j of safe) if (!opened.has(j)) (flood(j, hidden, nums, opened, rows, cols), (progress = true))
+    for (const j of safe) if (!opened.has(j)) (opened.add(j), (progress = true))
   }
   return opened
 }
@@ -82,37 +71,31 @@ function solveFrom(start: Set<number>, hidden: boolean[], nums: number[], rows: 
 /**
  * 盤を作る。はじめから削ってあるマス（opened）も決める
  * 手がかりがなくなって運まかせに削るしかない場面が出ないように、行きづまるところでは、そのとなりの霜を1つ先に削っておく
- * なるべく先に削るマスが少なく、はじめに開いている広さがほどよい（3割くらい）盤を選ぶ
+ * 先に削っておくマスがなるべく少ない盤を選ぶ（少しずつ削り進められるように）
  */
-function makeBoard(rows: number, cols: number, items: number) {
+function makeBoard(rows: number, cols: number, items: number, start: number) {
   const n = rows * cols
   const safeCount = n - items
-  let best: { hidden: boolean[]; nums: number[]; opened: Set<number>; score: number } | null = null
+  const all = Array.from({ length: n }, (_, i) => i)
+  let best: { hidden: boolean[]; nums: number[]; opened: Set<number>; extra: number } | null = null
   for (let t = 0; t < 300; t++) {
     const hidden = Array<boolean>(n).fill(false)
-    for (const i of shuffle(Array.from({ length: n }, (_, i) => i)).slice(0, items)) hidden[i] = true
+    for (const i of shuffle(all).slice(0, items)) hidden[i] = true
     const nums = hidden.map((_, i) => around(i, rows, cols).filter((j) => hidden[j]).length)
-    // 0のマス（まわりに商品がない）から広げて、はじめに開いておく
-    const zeros = shuffle(Array.from({ length: n }, (_, i) => i).filter((i) => !hidden[i] && nums[i] === 0))
-    if (!zeros.length) continue
-    const opened = new Set<number>()
-    flood(zeros[0], hidden, nums, opened, rows, cols)
+    const opened = new Set(shuffle(all.filter((i) => !hidden[i])).slice(0, start))
     let extra = 0
     for (;;) {
       const solved = solveFrom(opened, hidden, nums, rows, cols)
       if (solved.size === safeCount) break
       // 行きづまった：解けたところのとなりにある霜（商品ではないもの）を1つ、はじめから削っておく
-      const edge = shuffle(Array.from({ length: n }, (_, i) => i).filter((i) => !hidden[i] && !solved.has(i) && around(i, rows, cols).some((j) => solved.has(j))))
-      const pick = edge[0] ?? Array.from({ length: n }, (_, i) => i).find((i) => !hidden[i] && !solved.has(i))!
-      flood(pick, hidden, nums, opened, rows, cols)
+      const edge = shuffle(all.filter((i) => !hidden[i] && !solved.has(i) && around(i, rows, cols).some((j) => solved.has(j))))
+      opened.add(edge[0] ?? all.find((i) => !hidden[i] && !solved.has(i))!)
       extra += 1
     }
-    const ratio = opened.size / safeCount
-    // 全部開いてしまう盤は遊べないので使わない
-    if (ratio > 0.6) continue
-    const score = extra * 10 + Math.abs(ratio - 0.3) * 10
-    if (!best || score < best.score) best = { hidden, nums, opened, score }
-    if (extra === 0 && ratio >= 0.15 && ratio <= 0.45) break
+    // はじめから開いているのが安全なマスの半分をこえる盤は、削る楽しみが少ないので使わない
+    if (opened.size > safeCount / 2) continue
+    if (!best || extra < best.extra) best = { hidden, nums, opened, extra }
+    if (extra === 0) break
   }
   return best!
 }
@@ -125,7 +108,7 @@ export function Sweeper({ products, onDone }: GameProps) {
   const n = lv.rows * lv.cols
   // 盤は問題ごとに作る（はじめからいくつかのマスを削っておく）
   const board = useMemo<Board>(() => {
-    const made = makeBoard(lv.rows, lv.cols, lv.items)
+    const made = makeBoard(lv.rows, lv.cols, lv.items, lv.start)
     // かくす商品（商品が少ないときは同じ商品を2回使う）
     const pool = shuffle(products)
     let k = 0
@@ -166,7 +149,8 @@ export function Sweeper({ products, onDone }: GameProps) {
       setBroken(br)
       sfx('ng')
     } else {
-      flood(i, b.hidden, b.nums, o, lv.rows, lv.cols)
+      // 1マスずつ削る（まわりに商品がなくても、一気には開かない）
+      o.add(i)
       sfx('tap')
     }
     setOpened(o)
@@ -187,7 +171,7 @@ export function Sweeper({ products, onDone }: GameProps) {
     <Stage
       r={r}
       question={`霜の下に商品が ${lv.items}個 かくれています。商品を割らないように、霜だけを全部削ってください`}
-      coach="白いマスは、もう削ってあるところです。数字は、まわり8マスにかくれている商品の数。数字をヒントに、商品のない霜をタップして削ります。商品がありそうなマスは「印をつける」にして、タップで印をつけておきましょう"
+      coach="白いマスは、もう削ってあるところです（数字がないマスは、まわりに商品がありません）。数字は、まわり8マスにかくれている商品の数。数字をヒントに、商品のない霜をタップして削ります。商品がありそうなマスは「印をつける」にして、タップで印をつけておきましょう"
     >
       <div className={`sweeper c${lv.cols}`} style={{ gridTemplateColumns: `repeat(${lv.cols}, 1fr)` }}>
         {Array.from({ length: n }, (_, i) => {

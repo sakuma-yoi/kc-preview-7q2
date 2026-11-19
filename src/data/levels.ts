@@ -158,13 +158,11 @@ export const VALUE = [
   { options: 3, gap: [0.05, 0.1], timeSec: 8 },
 ]
 
-/** 霜とりスイーパー。rows×cols のマスに、items 個の商品がかくれている（最初に削るマスとそのまわりには置かない） */
+/** 霜とりスイーパー。rows×cols のマスに、items 個の商品がかくれている（マスの4割くらい）。start＝はじめから削ってあるマスの数（行きづまるところがあると増える） */
 export const SWEEPER = [
-  { rows: 4, cols: 4, items: 2 },
-  { rows: 5, cols: 5, items: 3 },
-  { rows: 5, cols: 5, items: 4 },
-  { rows: 6, cols: 6, items: 5 },
-  { rows: 6, cols: 6, items: 7 },
+  { rows: 3, cols: 3, items: 4, start: 1 },
+  { rows: 4, cols: 4, items: 6, start: 2 },
+  { rows: 5, cols: 5, items: 10, start: 2 },
 ]
 /** 霜とりスイーパー：商品を1つ割るごとに引く点 */
 export const SWEEPER_PENALTY = 10
