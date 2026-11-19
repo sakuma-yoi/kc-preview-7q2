@@ -9,7 +9,7 @@ import { gameById } from '../data/games'
 import { PRODUCTS, productById, purchaseStamps } from '../data/products'
 import { dateKey, daysInMonth, fromKey, jpDate, mdLabel, WEEK_LABELS, weekDays } from '../lib/date'
 import { sfx } from '../lib/sfx'
-import { clearedToday, purchase, purchaseLeft, ticketExpiries, today, todayKey, useStore } from '../store'
+import { canClaimFree, clearedToday, purchase, purchaseLeft, ticketExpiries, today, todayKey, useStore } from '../store'
 
 const TILT = [-8, 5, -3, 9, -6, 4, -10, 7, -4, 0]
 
@@ -72,6 +72,12 @@ export function Home({ fresh, onFresh, onPlay, onProduct, onCoupon }: Props) {
           </p>
           <button onClick={() => update((s) => void (s.ticketsExpired = null))}>とじる</button>
         </div>
+      )}
+      {canClaimFree(state) && (
+        <button className="ticket-alert free" onClick={onCoupon}>
+          <p>🎁 今月の無料クーポンがもらえます。クーポン画面からどうぞ</p>
+          <span aria-hidden="true">›</span>
+        </button>
       )}
       {expiring && (
         <button className="ticket-alert" onClick={onCoupon}>

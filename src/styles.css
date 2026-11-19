@@ -3660,13 +3660,6 @@ img.picon.photo {
   stroke-width: 0.16;
   stroke-dasharray: 0.35 0.25;
 }
-.nori-cap {
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-soft);
-}
 .nori-opts {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -3699,23 +3692,43 @@ img.picon.photo {
 .nori-opt:not(:disabled):active {
   transform: scale(0.96);
 }
-.panel {
+/* 折り方の図 */
+.nori-how {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.nori-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.nori-step svg {
+  width: 54px;
+  height: 54px;
+}
+.nori-step i {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.crease.how {
+  stroke: #f0b94a;
+  stroke-width: 0.6;
+  stroke-dasharray: 1 0.7;
+}
+/* 開いていく様子：三角が1つずつ広がる */
+.sector {
   transform-box: view-box;
+  transform-origin: 6px 6px;
+  animation: sector-in 0.4s ease-out both;
 }
-.panel.x {
-  animation: unfold-x 0.45s ease-out both;
-}
-.panel.y {
-  animation: unfold-y 0.45s ease-out both;
-}
-@keyframes unfold-x {
+@keyframes sector-in {
   from {
-    transform: scaleX(0);
-  }
-}
-@keyframes unfold-y {
-  from {
-    transform: scaleY(0);
+    opacity: 0;
+    transform: scale(0.3);
   }
 }
 
@@ -3772,4 +3785,24 @@ img.picon.photo {
 .cube-steps b {
   font-family: var(--font-display);
   font-size: 22px;
+}
+/* 4枚重ねの三角は横長なので、2つずつ大きく並べる */
+.nori-opts.f4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.nori-opts.f4 .nori-opt svg {
+  max-height: none;
+}
+/* 月に1回の無料クーポン */
+.ticket-alert.free {
+  background: #e8f6e6;
+  box-shadow: inset 0 0 0 2px #7cc173;
+}
+.coupon.free {
+  background: #f1faef;
+  box-shadow: inset 0 0 0 2px #7cc173;
+}
+.coupon.free.got {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--line);
 }

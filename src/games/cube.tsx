@@ -28,7 +28,8 @@ const FACES: FaceDef[] = [
 /** 見えている3面（回せる面） */
 const VISIBLE = [0, 1, 2]
 const FACE_NAME = ['上の面', '左の面', '右の面']
-const FACE_TINT = ['#fde7c8', '#d8efd7', '#dbe9fb', '#f6d9e6', '#e9e1fb', '#fff3b8']
+/** 面の色。色で面を見分けられるように、はっきりした色にする */
+const FACE_COLOR = ['#f2c14e', '#5cb85c', '#4a90d9', '#e8644a', '#9b6dd6', '#f4f1e8']
 
 /** シール1枚：pos＝小さな立方体の位置、n＝向き、up＝絵の上の向き。face・r・c＝もとの面と、その面の中の場所 */
 type Sticker = { pos: V; n: V; up: V; face: number; r: number; c: number }
@@ -50,15 +51,16 @@ function turn(st: Sticker[], face: number, cw: boolean): Sticker[] {
 }
 
 const stateKey = (st: Sticker[]) => st.map((s) => `${s.pos}|${s.n}|${s.up}`).join(';')
+/** そろっているか：どのシールも、もとの面の向きにある（絵は傾けずに描くので、向きまではくらべない） */
+const isSolved = (st: Sticker[]) => st.every((s) => eq(s.n, FACES[s.face].n))
 type Move = { face: number; cw: boolean }
 
 /** いちばん少ない手数（3面だけを使う。崩した回数までさがす） */
 function minMoves(st: Sticker[], limit: number) {
-  const goal = stateKey(solved())
   let frontier = [st]
   const seen = new Set([stateKey(st)])
   for (let d = 0; d <= limit; d++) {
-    if (frontier.some((s) => stateKey(s) === goal)) return d
+    if (frontier.some(isSolved)) return d
     const next: Sticker[][] = []
     for (const s of frontier)
       for (const face of VISIBLE)
@@ -75,13 +77,13 @@ function minMoves(st: Sticker[], limit: number) {
 /** 斜め上から見た図（等角投影） */
 const proj = (v: V): [number, number] => [(v[0] - v[2]) * 0.866, (v[0] + v[2]) * 0.5 - v[1]]
 
-/** 1つの面の絵（写真があれば写真、なければ絵文字）を3×3に分けた1枚 */
-function Piece({ p, r, c }: { p: Product; r: number; c: number }) {
+/** シール1枚に描く商品の小さな絵（写真があれば写真、なければ絵文字）。向きは傾けない */
+function Mini({ p }: { p: Product }) {
   const url = catalog.icons[p.id] ?? catalog.images[p.id]
   return url ? (
-    <image href={url} x={-c} y={-r} width={3} height={3} preserveAspectRatio="xMidYMid slice" clipPath="url(#cube-unit)" />
+    <image href={url} x={0.2} y={0.2} width={0.6} height={0.6} preserveAspectRatio="xMidYMid slice" clipPath="url(#cube-mini)" />
   ) : (
-    <text x={1.5 - c} y={1.5 - r} fontSize={2.3} textAnchor="middle" dominantBaseline="central" clipPath="url(#cube-unit)">
+    <text x={0.5} y={0.53} fontSize={0.55} textAnchor="middle" dominantBaseline="central">
       {p.icon}
     </text>
   )
@@ -91,8 +93,8 @@ function CubeView({ st, goods, spin }: { st: Sticker[]; goods: Product[]; spin: 
   return (
     <svg className="cube-svg" viewBox="-4.4 -4.9 8.8 9.4" aria-hidden="true">
       <defs>
-        <clipPath id="cube-unit" clipPathUnits="userSpaceOnUse">
-          <rect x={0} y={0} width={1} height={1} />
+        <clipPath id="cube-mini" clipPathUnits="userSpaceOnUse">
+          <rect x={0.2} y={0.2} width={0.6} height={0.6} rx={0.14} />
         </clipPath>
       </defs>
       {/* 軸（見えている3面の真ん中を通る線） */}
@@ -141,18 +143,15 @@ function CubeView({ st, goods, spin }: { st: Sticker[]; goods: Product[]; spin: 
               .map((s) => {
                 const col = dot(s.pos, f.right) + 1
                 const row = dot(s.pos, f.down) + 1
-                // 絵の向き：上が面の上なら0、右なら1、下なら2、左なら3（×90°右回し）
-                const k = eq(s.up, mul(f.down, -1)) ? 0 : eq(s.up, f.right) ? 1 : eq(s.up, f.down) ? 2 : 3
                 const inset = 0.06
                 const o = add(add(mul(f.n, 1.5), mul(f.right, col - 1.5 + inset)), mul(f.down, row - 1.5 + inset))
                 const [ox, oy] = proj(o)
                 const s1 = 1 - inset * 2
                 return (
                   <g key={`${s.face}-${s.r}-${s.c}`} transform={`matrix(${ax * s1} ${ay * s1} ${bx * s1} ${by * s1} ${ox} ${oy})`}>
-                    <g transform={`rotate(${k * 90} 0.5 0.5)`}>
-                      <rect x={0} y={0} width={1} height={1} rx={0.12} fill={FACE_TINT[s.face]} />
-                      <Piece p={goods[s.face]} r={s.r} c={s.c} />
-                    </g>
+                    <rect x={0} y={0} width={1} height={1} rx={0.12} fill={FACE_COLOR[s.face]} />
+                    <rect x={0.17} y={0.17} width={0.66} height={0.66} rx={0.17} fill="#fff" opacity={0.9} />
+                    <Mini p={goods[s.face]} />
                   </g>
                 )
               })}
@@ -239,7 +238,7 @@ export function Cube({ products, onDone }: GameProps) {
       const used = steps + 1
       setSteps(used)
       busy.current = false
-      if (stateKey(next) === stateKey(solved())) finish(used, false)
+      if (isSolved(next)) finish(used, false)
     }
     requestAnimationFrame(tick)
   }
@@ -247,7 +246,7 @@ export function Cube({ products, onDone }: GameProps) {
   return (
     <Stage
       r={r}
-      question={`キューブが ${q.best}回 回されています。回して、6つの面の写真を元にもどしてください`}
+      question={`キューブが ${q.best}回 回されています。回して、6つの面の色をそろえてください`}
       coach="軸の先の矢印ボタンで、その面を回します。↻は右回し、↺は左回しです。回された向きと反対に回すと元にもどります"
     >
       <div className="cube-wrap">

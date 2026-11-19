@@ -47,6 +47,9 @@ export const COUPONS: CouponDef[] = [
   { id: 'chalf', name: 'NEW商品 半額', cost: 6, target: 'new', targetLabel: 'NEWの商品' },
 ]
 
+/** 月に1回、チケットなしでもらえるクーポン */
+export const FREE_COUPON_ID = 'c20'
+
 /** そのクーポンが、その商品に使えるか */
 export const couponApplies = (c: CouponDef, p: { type: string; isNew?: boolean }) =>
   c.target === 'frozen' ? p.type === '冷凍' : c.target === 'chilled' ? p.type === 'チルド' : !!p.isNew
@@ -107,4 +110,4 @@ export const ODDONE_LATE: 'color' | 'flip' = 'color'
 /** 冷凍庫脳年齢：100点で20歳、0点で55歳 */
 export const brainAge = (score: number) => Math.round(20 + (100 - score) * 0.35)
 
-export const APP_VERSION = '1.15.0'
+export const APP_VERSION = '1.16.0'

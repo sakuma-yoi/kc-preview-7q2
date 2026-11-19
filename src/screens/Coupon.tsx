@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from 'react'
 import { TicketIcon } from '../components/Icons'
 import { Sheet } from '../components/Sheet'
 import { Thumb } from '../components/Pack'
-import { CARD_SIZE, COUPON_DAYS, COUPON_SOON_DAYS, couponApplies, COUPONS, SEASON_MONTHS, seasonLabel, seasonOf, type CouponDef } from '../data/config'
+import { CARD_SIZE, COUPON_DAYS, FREE_COUPON_ID, COUPON_SOON_DAYS, couponApplies, COUPONS, SEASON_MONTHS, seasonLabel, seasonOf, type CouponDef } from '../data/config'
 import { PRODUCTS } from '../data/products'
 import { sfx } from '../lib/sfx'
 import { mdLabel } from '../lib/date'
-import { daysLeft, exchange, ticketExpiries, today, useStore, type OwnedCoupon } from '../store'
+import { canClaimFree, claimFree, daysLeft, exchange, ticketExpiries, today, useStore, type OwnedCoupon } from '../store'
 
 const defOf = (c: OwnedCoupon) => COUPONS.find((d) => d.id === c.couponId)!
 const jp = (key: string) => {
@@ -113,6 +113,29 @@ export function Coupon({ onProduct }: { onProduct: (id: string) => void }) {
 
       {tab === 'get' ? (
         <ul className="coupon-list">
+          {/* 月に1回の無料クーポン */}
+          <li className={`coupon free ${canClaimFree(state) ? '' : 'got'}`}>
+            <div className="coupon-main">
+              <strong>🎁 今月の無料クーポン</strong>
+              <span>
+                {COUPONS.find((c) => c.id === FREE_COUPON_ID)!.name}・チケットなしで月に1回・{COUPON_DAYS}日間有効
+              </span>
+            </div>
+            <button
+              className="coupon-btn"
+              disabled={!canClaimFree(state)}
+              onClick={() =>
+                update((s) => {
+                  if (claimFree(s)) {
+                    sfx('coin')
+                    toast('無料クーポンをもらいました。「持っているクーポン」から使えます')
+                  }
+                })
+              }
+            >
+              {canClaimFree(state) ? 'もらう' : '来月また'}
+            </button>
+          </li>
           {/* 使える商品がないクーポンは出さない（チルドの商品がないときなど） */}
           {COUPONS.filter((c) => PRODUCTS.some((p) => couponApplies(c, p))).map((c) => {
             const short = c.cost - state.tickets

@@ -2,6 +2,7 @@
 
 import { createContext, useContext } from 'react'
 import {
+  FREE_COUPON_ID,
   CARD_SIZE,
   COUPON_DAYS,
   COUPONS,
@@ -33,6 +34,8 @@ export type State = {
   tickets: number
   /** もらったシーズンごとの交換チケットの枚数（シーズン番号 → 枚数）。期限の近いものから使う */
   ticketSeasons: Record<string, number>
+  /** 無料クーポンをもらった月（2026-11 の形） */
+  freeCouponMonth: string | null
   /** シーズンが終わって消えたチケット（ホームで1回知らせる） */
   ticketsExpired: { n: number; until: string } | null
   /** いまのスタンプカードに押してある数 */
@@ -73,6 +76,7 @@ export const initialState = (): State => ({
   tickets: 0,
   ticketSeasons: {},
   ticketsExpired: null,
+  freeCouponMonth: null,
   stamps: 0,
   clearedDays: [],
   owned: GAMES.filter((g) => g.free).map((g) => g.id),
@@ -323,6 +327,23 @@ export function purchase(s: State, productId: string) {
 export function exchange(s: State, def: CouponDef) {
   if (s.tickets < def.cost) return false
   spendTickets(s, def.cost)
+  issue(s, def)
+  return true
+}
+
+const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+/** 今月の無料クーポンをまだもらっていないか */
+export const canClaimFree = (s: State) => s.freeCouponMonth !== monthKey(today(s))
+/** 今月の無料クーポンをもらう（月に1回） */
+export function claimFree(s: State) {
+  if (!canClaimFree(s)) return false
+  s.freeCouponMonth = monthKey(today(s))
+  issue(s, COUPONS.find((c) => c.id === FREE_COUPON_ID)!)
+  return true
+}
+
+/** クーポンを1枚持たせる */
+function issue(s: State, def: CouponDef) {
   const d = today(s)
   const code = String(Math.floor(1e11 + Math.random() * 9e11))
   s.coupons.push({
@@ -333,7 +354,6 @@ export function exchange(s: State, def: CouponDef) {
     used: false,
     code,
   })
-  return true
 }
 
 /** 期限までの残り日数（今日が期限なら0、過ぎていたらマイナス） */
