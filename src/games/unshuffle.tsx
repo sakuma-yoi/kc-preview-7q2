@@ -175,7 +175,7 @@ export function Unshuffle({ products, onDone }: GameProps) {
           return (
             <button
               key={orig}
-              className={`fr ${show ? 'open' : ''} ${lift ? 'lift' : ''} ${phase === 'open' && isTarget ? 'ask' : ''} ${phase === 'result' && isTarget ? 'right' : ''} ${phase === 'result' && picked === orig && !isTarget ? 'wrong' : ''}`}
+              className={`fr ${show ? 'open' : ''} ${lift ? 'lift' : ''} ${phase === 'open' && isTarget ? 'ask' : ''} ${phase === 'result' && isTarget ? 'right' : ''} ${phase === 'result' && picked === orig && !isTarget ? 'wrong' : ''} ${doorsOpen && !isTarget && !(phase === 'result' && picked === orig) ? 'dim' : ''}`}
               style={{ transform: `translate(${dc * 100}%, ${dr * 100}%)` }}
               onClick={() => answer(orig)}
               disabled={phase !== 'answer'}

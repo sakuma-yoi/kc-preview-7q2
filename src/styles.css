@@ -3621,3 +3621,9 @@ img.picon.photo {
   text-align: center;
   font-weight: 700;
 }
+/* 聞かれる商品以外は薄くして目立たなくする */
+.fr.dim .fr-in {
+  opacity: 0.35;
+  filter: grayscale(0.7);
+  transition: opacity 0.3s;
+}
