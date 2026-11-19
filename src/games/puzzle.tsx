@@ -366,6 +366,8 @@ export function Cups({ onDone }: GameProps) {
     const t = applyMove(s, m, q.caps)
     sfx(m.kind === 'pot' ? 'coin' : 'tap')
     setS(t)
+    // 1つ動かしたら、選ぶのをやめる
+    setSel(null)
     const used = steps + 1
     setSteps(used)
     if (t.pot === q.target) finish(used, false)
@@ -399,7 +401,7 @@ export function Cups({ onDone }: GameProps) {
           カップで量って、鍋の水を <b>{ml(q.target)}</b> にしてください
         </>
       }
-      coach="まずカップをタップして選びます。次に、蛇口（水を入れる）・鍋（注ぐ）・もう1つのカップ（移す）・流し（捨てる）のどれかをタップします。同じカップをもう一度タップすると、選ぶのをやめられます"
+      coach="まずカップをタップして選びます。次に、蛇口（水を入れる）・鍋（注ぐ）・もう1つのカップ（移す）・流し（捨てる）のどれかをタップします。1回動かすたびに、カップを選び直します"
     >
       <div className="kitchen">
         <button className={`tg faucet ${hot(sel === null ? null : { kind: 'fill', i: sel })}`} onClick={() => toTarget('fill')} aria-label="蛇口：選んだカップに水をいっぱい入れる">
