@@ -2996,7 +2996,7 @@ a.btn {
   font-weight: 900;
 }
 /* 練習中は、押すところをゆっくり光らせる */
-.stage.practice :is(.tile, .cell, .card-btn, .case, .sw.frost, .cup-btn:not(:disabled), .letters button, .ts-col button, .wallet-grid .money, .value-card, .checkout:not(:disabled), .btn.play:not(:disabled)) {
+.stage.practice :is(.tile, .cell, .card-btn, .case, .sw.frost, .tg.can, .tg.pick, .letters button, .ts-col button, .wallet-grid .money, .value-card, .checkout:not(:disabled), .btn.play:not(:disabled)) {
   animation: guide 1.6s ease-in-out infinite;
 }
 @keyframes guide {
@@ -3258,16 +3258,12 @@ img.picon.photo {
 }
 
 /* ===== 計量カップ ===== */
-.pot-wrap {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 14px;
-}
 .pot {
   position: relative;
-  width: 150px;
-  height: 104px;
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  height: 96px;
   overflow: hidden;
   border-radius: 10px 10px 42px 42px;
   background: #eef3f6;
@@ -3315,14 +3311,6 @@ img.picon.photo {
     inset 0 0 0 4px var(--red),
     inset 0 6px 0 4px #f08c7c;
 }
-.pot-steps {
-  margin: 0 0 6px;
-  font-size: 15px;
-}
-.pot-steps b {
-  font-family: var(--font-display);
-  font-size: 24px;
-}
 .cups-warn {
   margin: 0;
   padding: 8px 12px;
@@ -3337,14 +3325,9 @@ img.picon.photo {
   display: grid;
   gap: 10px;
 }
-.cup-col {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-}
 .cup {
   position: relative;
+  display: block;
   align-self: center;
   width: 78px;
   height: 92px;
@@ -3372,34 +3355,114 @@ img.picon.photo {
   color: var(--ink);
   text-shadow: 0 0 4px #fff, 0 0 4px #fff;
 }
-.cup-name {
-  text-align: center;
-  font-weight: 700;
-  font-size: 15px;
-}
-.cup-btn {
-  min-height: 42px;
-  padding: 4px 6px;
-  border-radius: 12px;
-  background: var(--paper);
-  box-shadow: inset 0 0 0 2px var(--line);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink);
-}
-.cup-btn.cb-pot {
-  background: #fff1d6;
-  box-shadow: inset 0 0 0 2px #f0b94a;
-}
-.cup-btn:disabled {
-  opacity: 0.4;
-}
-.cup-btn:not(:disabled):active {
-  transform: scale(0.96);
-}
 .cups-answer {
   margin: 0;
   padding-left: 1.4em;
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* 計量カップ：カップを選んでから、行き先（蛇口・鍋・流し・ほかのカップ）を選ぶ */
+.kitchen {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+.tg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 10px 6px 8px;
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--line);
+  color: var(--ink);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
+}
+.tg-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+.tg-ico {
+  font-size: 44px;
+  line-height: 1;
+}
+/* 選んでいるカップから動かせる行き先 */
+.tg.can {
+  background: #fff6dc;
+  box-shadow: inset 0 0 0 3px #f0b94a;
+}
+/* 選んでいるカップ */
+.tg.sel {
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 4px var(--red),
+    0 6px 14px rgba(226, 65, 43, 0.25);
+  transform: translateY(-4px);
+}
+.tg:active {
+  transform: scale(0.97);
+}
+.tg.sel:active {
+  transform: translateY(-4px) scale(0.97);
+}
+.sink-basin {
+  position: relative;
+  display: block;
+  width: 70px;
+  height: 36px;
+  margin-bottom: 4px;
+  border-radius: 4px 4px 22px 22px;
+  background: linear-gradient(#cfdbe2, #eef3f6);
+  box-shadow: inset 0 0 0 3px #8a9ca6;
+}
+.sink-basin i {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 12px;
+  height: 6px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: #5d6f79;
+}
+.cups-status {
+  margin: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.cups-status small {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.cups-status.on b {
+  color: var(--red);
+}
+.cups-status[data-nudge] {
+  color: var(--red);
+  font-weight: 700;
+  animation: nudge 0.35s;
+}
+@keyframes nudge {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+.cup-tg {
+  padding-top: 12px;
 }
