@@ -115,92 +115,111 @@ export function Sweeper({ products, onDone }: GameProps) {
     return { ...made, goods: made.hidden.map((h) => (h ? pool[k++ % pool.length] : null)) }
   }, [r.round]) // eslint-disable-line react-hooks/exhaustive-deps
   const [opened, setOpened] = useState<Set<number>>(board.opened)
-  const [marked, setMarked] = useState<Set<number>>(new Set())
+  const [flags, setFlags] = useState<Set<number>>(new Set())
   const [broken, setBroken] = useState<number[]>([])
-  const [mode, setMode] = useState<'dig' | 'mark'>('dig')
+  /** 選んでいる霜のマス（null＝選んでいない） */
+  const [sel, setSel] = useState<number | null>(null)
+  const [note, setNote] = useState('')
   const [done, setDone] = useState(false)
   useEffect(() => {
     setOpened(new Set(board.opened))
-    setMarked(new Set())
+    setFlags(new Set())
     setBroken([])
-    setMode('dig')
+    setSel(null)
+    setNote('')
     setDone(false)
     r.see(board.goods.filter((g): g is Product => !!g).map((g) => g.id))
   }, [board]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const tap = (i: number) => {
-    if (done || opened.has(i)) return
-    if (mode === 'mark') {
-      const m = new Set(marked)
-      if (m.has(i)) m.delete(i)
-      else m.add(i)
-      setMarked(m)
-      sfx('tap')
-      return
-    }
-    if (marked.has(i)) return
-    const b = board
+  /** 霜を削る（いくつかまとめても削れる）。商品を削ると割れる（ここで終わりにはしない） */
+  const dig = (cells: number[]) => {
     const o = new Set(opened)
-    let br = broken
-    if (b.hidden[i]) {
-      // 商品を削ってしまった：割れた商品が出てくる（ここで終わりにはしない）
+    const br = [...broken]
+    for (const i of cells) {
       o.add(i)
-      br = [...broken, i]
-      setBroken(br)
-      sfx('ng')
-    } else {
-      // 1マスずつ削る（まわりに商品がなくても、一気には開かない）
-      o.add(i)
-      sfx('tap')
+      if (board.hidden[i]) br.push(i)
     }
+    sfx(br.length > broken.length ? 'ng' : 'tap')
     setOpened(o)
-    const safeLeft = Array.from({ length: n }, (_, j) => j).filter((j) => !b.hidden[j] && !o.has(j)).length
+    setBroken(br)
+    setSel(null)
+    const safeLeft = Array.from({ length: n }, (_, j) => j).filter((j) => !board.hidden[j] && !o.has(j)).length
     if (safeLeft === 0) {
       setDone(true)
       const miss = br.length
       // 割った数：0個◎、1個○、2個△、3個以上✕
       const grade: Grade = miss === 0 ? 'great' : miss === 1 ? 'good' : miss === 2 ? 'fair' : 'bad'
-      const ids = b.goods.filter((g): g is Product => !!g).map((g) => g.id)
+      const ids = board.goods.filter((g): g is Product => !!g).map((g) => g.id)
       r.answer(Math.max(5, Math.round(100 / r.total) - SWEEPER_PENALTY * miss), grade, 2200, grade === 'bad' ? [] : ids)
     }
   }
 
-  const left = lv.items - marked.size - broken.filter((i) => !marked.has(i)).length
+  const tap = (i: number) => {
+    if (done) return
+    setNote('')
+    if (!opened.has(i)) {
+      // 霜のマス：選ぶ（同じマスをもう一度タップすると、選ぶのをやめる）
+      sfx('tap')
+      setSel(sel === i ? null : i)
+      return
+    }
+    if (board.hidden[i]) return
+    // 数字のマス：まわりの旗の数が数字と同じなら、旗のない霜をまとめて削る（割れた商品も旗と同じに数える）
+    const nb = around(i, lv.rows, lv.cols)
+    const known = nb.filter((j) => flags.has(j) || broken.includes(j)).length
+    const rest = nb.filter((j) => !opened.has(j) && !flags.has(j))
+    if (!rest.length) return
+    if (known !== board.nums[i]) {
+      setSel(null)
+      setNote(`まわりの旗が${known}本で、数字の${board.nums[i]}と合っていません`)
+      return
+    }
+    dig(rest)
+  }
+
+  const flag = () => {
+    if (sel === null) return
+    const f = new Set(flags)
+    if (f.has(sel)) f.delete(sel)
+    else f.add(sel)
+    setFlags(f)
+    setSel(null)
+    sfx('tap')
+  }
+
+  const left = lv.items - flags.size - broken.filter((i) => !flags.has(i)).length
 
   return (
     <Stage
       r={r}
       question={`霜の下に商品が ${lv.items}個 かくれています。商品を割らないように、霜だけを全部削ってください`}
-      coach="白いマスは、もう削ってあるところです（数字がないマスは、まわりに商品がありません）。数字は、まわり8マスにかくれている商品の数。数字をヒントに、商品のない霜をタップして削ります。商品がありそうなマスは「印をつける」にして、タップで印をつけておきましょう"
+      coach="霜のマスをタップして選び、下のボタンで「削る」か「旗を立てる」を選びます。数字は、まわり8マスの商品の数。旗の数が数字と同じなら、数字をタップするとまわりをまとめて削れます"
     >
       <div className={`sweeper c${lv.cols}`} style={{ gridTemplateColumns: `repeat(${lv.cols}, 1fr)` }}>
         {Array.from({ length: n }, (_, i) => {
-          const open = opened.has(i) || (done && !!board?.hidden[i])
-          const good = board?.goods[i]
+          const open = opened.has(i) || (done && board.hidden[i])
+          const good = board.goods[i]
           const isBroken = broken.includes(i)
           return (
             <button
               key={`${r.round}-${i}`}
-              className={`sw ${open ? 'open' : 'frost'} ${isBroken ? 'broken' : ''} ${good && open ? 'good' : ''} ${marked.has(i) && !open ? 'marked' : ''}`}
+              className={`sw ${open ? 'open' : 'frost'} ${isBroken ? 'broken' : ''} ${good && open ? 'good' : ''} ${flags.has(i) && !open ? 'flagged' : ''} ${sel === i ? 'sel' : ''}`}
               onClick={() => tap(i)}
+              aria-pressed={sel === i}
               aria-label={
                 open
                   ? good
                     ? `${good.name}${isBroken ? '（割れた）' : ''}`
-                    : board && board.nums[i]
-                      ? `まわりに${board.nums[i]}個`
-                      : 'なにもない'
-                  : marked.has(i)
-                    ? '印をつけた霜'
-                    : '霜'
+                    : `まわりに${board.nums[i]}個`
+                  : `${flags.has(i) ? '旗を立てた霜' : '霜'}${sel === i ? '（選んでいます）' : ''}`
               }
             >
               {open && good ? (
                 <PIcon id={good.id} />
-              ) : open && board && board.nums[i] > 0 ? (
+              ) : open ? (
                 <b className={`n${board.nums[i]}`}>{board.nums[i]}</b>
-              ) : !open && marked.has(i) ? (
-                <span className="pin">📌</span>
+              ) : flags.has(i) ? (
+                <span className="pin">🚩</span>
               ) : null}
             </button>
           )
@@ -214,12 +233,13 @@ export function Sweeper({ products, onDone }: GameProps) {
           割った商品 <b>{broken.length}</b>個
         </span>
       </p>
-      <div className="seg sw-mode" role="radiogroup" aria-label="タップしたときの動き">
-        <button role="radio" aria-checked={mode === 'dig'} className={mode === 'dig' ? 'on' : ''} onClick={() => setMode('dig')}>
-          ⛏️ 霜を削る
+      <p className={`sw-status ${note ? 'warn' : ''}`}>{note || (done ? '' : sel === null ? '霜のマスをタップして選んでください' : '選んだマスを、削るか旗を立てるか選んでください')}</p>
+      <div className="sw-acts">
+        <button className="btn ghost sw-act" disabled={done || sel === null || flags.has(sel)} onClick={() => sel !== null && dig([sel])}>
+          ⛏️ 削る
         </button>
-        <button role="radio" aria-checked={mode === 'mark'} className={mode === 'mark' ? 'on' : ''} onClick={() => setMode('mark')}>
-          📌 印をつける
+        <button className="btn ghost sw-act" disabled={done || sel === null} onClick={flag}>
+          🚩 {sel !== null && flags.has(sel) ? '旗をはずす' : '旗を立てる'}
         </button>
       </div>
     </Stage>
