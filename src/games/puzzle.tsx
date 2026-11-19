@@ -384,6 +384,7 @@ export function Cups({ onDone }: GameProps) {
     if (locked) return
     if (sel === null) {
       sfx('tap')
+      setNudge(0)
       return setSel(i)
     }
     // 同じカップをもう一度押すと、選ぶのをやめる
