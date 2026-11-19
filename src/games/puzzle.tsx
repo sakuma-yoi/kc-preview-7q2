@@ -169,12 +169,15 @@ export function Sweeper({ products, onDone }: GameProps) {
     const known = nb.filter((j) => flags.has(j) || broken.includes(j)).length
     const rest = nb.filter((j) => !opened.has(j) && !flags.has(j))
     if (!rest.length) return
-    if (known !== board.nums[i]) {
-      setSel(null)
-      setNote(`まわりの旗が${known}本で、数字の${board.nums[i]}と合っていません`)
+    setSel(null)
+    if (known === board.nums[i]) return dig(rest)
+    // 数字から旗の数を引いた数が、まわりの霜（旗のないもの）の数と同じなら、その霜全部に旗を立てる
+    if (board.nums[i] - known === rest.length) {
+      setFlags(new Set([...flags, ...rest]))
+      sfx('tap')
       return
     }
-    dig(rest)
+    setNote(`まわりの旗が${known}本で、数字の${board.nums[i]}と合っていません`)
   }
 
   const flag = () => {
@@ -193,7 +196,7 @@ export function Sweeper({ products, onDone }: GameProps) {
     <Stage
       r={r}
       question={`霜の下に商品が ${lv.items}個 かくれています。商品を割らないように、霜だけを全部削ってください`}
-      coach="霜のマスをタップして選び、下のボタンで「削る」か「旗を立てる」を選びます。数字は、まわり8マスの商品の数。旗の数が数字と同じなら、数字をタップするとまわりをまとめて削れます"
+      coach="霜のマスをタップして選び、下のボタンで「削る」か「旗を立てる」を選びます。数字は、まわり8マスの商品の数。数字をタップすると、旗の数が数字と同じならまわりをまとめて削り、まわりの霜が全部商品だとわかるときはまとめて旗を立てます"
     >
       <div className={`sweeper c${lv.cols}`} style={{ gridTemplateColumns: `repeat(${lv.cols}, 1fr)` }}>
         {Array.from({ length: n }, (_, i) => {
