@@ -110,4 +110,4 @@ export const ODDONE_LATE: 'color' | 'flip' = 'color'
 /** 冷凍庫脳年齢：100点で20歳、0点で55歳 */
 export const brainAge = (score: number) => Math.round(20 + (100 - score) * 0.35)
 
-export const APP_VERSION = '1.16.0'
+export const APP_VERSION = '1.16.1'

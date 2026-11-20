@@ -198,15 +198,15 @@ export const UNSHUFFLE = [
 ]
 
 /**
- * 海苔の切り絵（雪の結晶の切り絵）。fold＝重ねる枚数（4＝ななめに2回折る、8＝さらに半分に折る）
- * stamps＝切り込みの数、options＝選択肢の数、fastSec＝この秒数までに正しく選ぶと◎（こえると○）
+ * 海苔の切り絵（紋切り）。2k 枚に重ねて扇の形に折る（開くと k 回くりかえす模様）
+ * holes＝切り込み（穴）の数、options＝選択肢の数、fastSec＝この秒数までに正しく選ぶと◎（こえると○）
  */
-export const NORI: { fold: 4 | 8; stamps: number; options: number; fastSec: number }[] = [
-  { fold: 4, stamps: 2, options: 3, fastSec: 12 },
-  { fold: 4, stamps: 3, options: 3, fastSec: 14 },
-  { fold: 8, stamps: 2, options: 3, fastSec: 16 },
-  { fold: 8, stamps: 3, options: 4, fastSec: 18 },
-  { fold: 8, stamps: 4, options: 4, fastSec: 20 },
+export const NORI: { k: number; holes: number; options: number; fastSec: number }[] = [
+  { k: 2, holes: 1, options: 3, fastSec: 12 },
+  { k: 3, holes: 2, options: 3, fastSec: 14 },
+  { k: 4, holes: 2, options: 4, fastSec: 16 },
+  { k: 5, holes: 2, options: 4, fastSec: 18 },
+  { k: 6, holes: 3, options: 4, fastSec: 20 },
 ]
 
 /** フローズンキューブ。scramble＝崩すときに回す回数 */
